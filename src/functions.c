@@ -37,3 +37,7 @@ void print_forest(tree_t* forest, int height, int width) {
 tree_t get_tree(int x, int y, int width, tree_t* forest) {
     return forest[width * y + x];
 }
+void scan_settings(int* width, int* height, double* density) {
+    printf("Please enter a width, height, and forest density:\n");
+    scanf(" %d %d %lf", width, height, density);
+}
