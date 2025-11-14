@@ -14,9 +14,8 @@ int main(void) {
     int width, height;
     double density;
     scan_settings(&width, &height, &density);
-
     tree_t* forest = malloc(width*height*sizeof(tree_t));
-    make_rnd_forest(forest, 1, width*height);
+    make_rnd_forest(forest, density, width*height);
     print_forest(forest, height, width);
     int x = 2;
     int y = 1;
