@@ -6,11 +6,14 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <stdbool.h>
+
 
 
 
 int main(void) {
     srand(time(NULL));
+    tree_t* surrounding = malloc(9*sizeof(tree_t));
     int width, height;
     double density;
     scan_settings(&width, &height, &density);
@@ -22,7 +25,13 @@ int main(void) {
 
     //Vi printer træets koordinater ud fra at øverste venstre hjørne, er (0,0) og printer dets værdi
     printf("Tree at (%d,-%d) has the status %d\n", x, y, get_tree(x,y,width,forest).status );
-    printf("%d", forest[width*y+x].status);
+    printf("%d"\n, forest[width*y+x].status);
+    chance(100,1,0);
+    printf("The statuses of the trees surrounding (x,y) are the following\n");
+
+    surrounding = check_surrounding(forest, surrounding, x,y,width,height);
+    free(forest);
+    free(surrounding);
 
     return 0;
 }

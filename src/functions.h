@@ -1,3 +1,4 @@
+#include <stdbool.h>
 //
 // Created by oskar on 03-11-2025.
 //
@@ -14,6 +15,9 @@ void print_forest(tree_t* forest, int height, int width);
 tree_t get_tree(int x, int y, int width, tree_t* forest);
 void scan_settings(int* width, int* height, double* density);
 
+int chance(int procent,bool forest_thinning,bool is_wet);
+
+tree_t* check_surrounding(tree_t* forest, tree_t* surrounding, int x, int y,int width, int height);
 
 
 #endif //FOREST_FIRE_PREVENTION_FUNCTIONS_H
