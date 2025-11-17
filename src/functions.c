@@ -51,6 +51,13 @@ void print_forest(tree_t* forest, int height, int width) {
 tree_t get_tree(int x, int y, int width, tree_t* forest) {
     return forest[width * y + x];
 }
+//Når start er true starter brænden på disse x y kordinater
+void start_brand(tree_t* forest, int x, int y, int width) {
+
+    tree_t tree = get_tree(x, y, width, forest);
+    tree.status = burning;
+    //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig"
+}
 
 // a function to return a prosent chance based on different factors
 
