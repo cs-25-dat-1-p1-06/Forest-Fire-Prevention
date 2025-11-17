@@ -25,7 +25,7 @@ int main(void) {
 
     //Vi printer træets koordinater ud fra at øverste venstre hjørne, er (0,0) og printer dets værdi
     printf("Tree at (%d,-%d) has the status %d\n", x, y, get_tree(x,y,width,forest).status );
-    printf("%d"\n, forest[width*y+x].status);
+    printf("%d\n", forest[width*y+x].status);
     chance(100,1,0);
     printf("The statuses of the trees surrounding (x,y) are the following\n");
 
