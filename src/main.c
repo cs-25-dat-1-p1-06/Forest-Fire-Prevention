@@ -15,8 +15,19 @@ int main(void) {
     make_rnd_forest(forest, density, width*height);
     print_forest(forest, height, width);
     system("pause");
-    free(forest);
+    
+    //Initiliasere vind
+    struct Wind *wind = (struct Wind*) malloc(sizeof(struct Wind));
 
+    //Tjekker om allokeringen var en success
+    if (wind == NULL) {
+        printf("Der er ikke plads i hukommelsen!");
+    }
+    start_wind(wind);
+    
+    free(forest);
+    free(wind);
+    
     return 0;
 }
 
