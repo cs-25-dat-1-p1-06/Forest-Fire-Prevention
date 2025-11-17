@@ -28,7 +28,7 @@ void make_rnd_forest(tree_t* forest, double density, int size) {
 void print_forest(tree_t* forest, int height, int width) {
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
-            switch (get_tree(i,j,width,forest).status) {
+            switch (get_tree(i,j,width,forest).status) { //ændrer farven alt efter status på træet og så printes træet på linje 45
                 case empty:
                     color_change(BLACK);
                     break;
