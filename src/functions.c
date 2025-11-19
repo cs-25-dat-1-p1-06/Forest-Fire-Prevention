@@ -56,9 +56,8 @@ tree_t* get_tree(int x, int y, int width, tree_t* forest) {
 }
 //Når start er true starter brænden på disse x y kordinater
 void start_brand(tree_t* forest, int x, int y, int width) {
-
-    tree_t tree = get_tree(x, y, width, forest);
-    tree.status = burning;
+    tree_t *tree = get_tree(x, y, width, forest);
+    tree->status = burning;
     //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig"
 }
 

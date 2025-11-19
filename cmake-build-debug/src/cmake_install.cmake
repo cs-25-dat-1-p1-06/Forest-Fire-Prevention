@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/nickl/CLionProjects/Forest-Fire-Prevention/src
+# Install script for directory: C:/Users/hartv/Desktop/Programmering/Projekter/Forest-Fire-Prevention/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,6 +40,6 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/nickl/CLionProjects/Forest-Fire-Prevention/cmake-build-debug/src/install_local_manifest.txt"
+  file(WRITE "C:/Users/hartv/Desktop/Programmering/Projekter/Forest-Fire-Prevention/cmake-build-debug/src/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
