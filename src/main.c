@@ -17,7 +17,7 @@ int main(void) {
     make_rnd_forest(forest, density, width*height);
     print_forest(forest, height, width);
     system("pause");
-    
+
     //Initiliasere vind
     struct Wind *wind = (struct Wind*) malloc(sizeof(struct Wind));
 
@@ -27,7 +27,6 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
     start_wind(wind);
-    
     free(forest);
     free(wind);
     
