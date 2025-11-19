@@ -39,22 +39,9 @@ tree_t get_tree(int x, int y, int width, tree_t* forest) {
     return forest[width * y + x];
 }
 
-// a function to return a prosent chance based on different factors
-
- int chance(int procent,bool forest_thinning,bool is_wet) {
-
-    if (forest_thinning) {
-        procent = procent-25;
-    }else procent = procent+5;
-
-    if (is_wet) {
-        procent = procent-20;
-    }else procent = procent+5;
-    printf("%d \n",procent);
 
 
-    return rand() % 100 < procent;
-}
+
 
 tree_t* check_surrounding(tree_t* forest, tree_t* surrounding, int x, int y,int width, int height) {
 
@@ -69,3 +56,55 @@ tree_t* check_surrounding(tree_t* forest, tree_t* surrounding, int x, int y,int 
     }
 return 0;
 }
+
+
+void chance(tree_t *surrounding) {
+    tree_t center = surrounding[4];
+
+    for (int i = 0; i < 9; i++) {
+        if (i == 4) continue;
+        tree_t *neighbor = &surrounding[i];
+        if (neighbor->status != fresh) continue;
+
+        int chance = 30;
+
+        switch (center.fire_strength) {
+            case 1: chance +=5; break;
+            case 2: chance +=10; break;
+            case 3: chance +=15; break;
+            case 4: chance +=20; break;
+            case 5: chance +=25; break;
+        }
+        switch (neighbor->humidity) {
+            case 0: chance-=0; break;
+            case 1: chance-=10; break;
+            case 2: chance-=20; break;
+            case 3: chance-=30; break;
+            case 4: chance-=40; break;
+            case 5: chance-=50; break;
+        }
+
+        int roll = rand() % 100;
+
+        if (roll < chance) {
+            neighbor->status = burning;
+            printf("Tree %d caught fire. Chance = %d Roll = %d \n",i,chance,roll);
+        } else {
+            printf("Tree %d did NOT catch fire. Chance = %d Roll %d \n",i,chance,roll);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

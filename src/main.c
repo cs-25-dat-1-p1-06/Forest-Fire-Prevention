@@ -24,13 +24,12 @@ int main(void) {
     print_forest(forest, HEIGHT, WIDTH);
     int x = 2;
     int y = 1;
-
     //Vi printer træets koordinater ud fra at øverste venstre hjørne, er (0,0) og printer dets værdi
     printf("Tree at (%d,-%d) has the status %d\n", x, y, get_tree(x,y,WIDTH,forest).status );
     printf("%d \n", forest[WIDTH*y+x].status);
 
-    chance(100,1,0);
-    printf("The statuses of the trees surrounding (x,y) are the following\n");
+    //chance(100,1,0);
+    //printf("The statuses of the trees surrounding (x,y) are the following\n");
 
     surrounding = check_surrounding(forest, surrounding, x,y,WIDTH,HEIGHT);
     free(forest);

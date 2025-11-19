@@ -7,14 +7,17 @@
 typedef enum {empty, fresh, burning, burnt} status_e;
 typedef struct {
     status_e status;
-    int humidity;
+    int humidity, fire_strength;
     double fuel_left;
 } tree_t;
+
+
+
 void make_rnd_forest(tree_t* forest, double density, int size);
 void print_forest(tree_t* forest, int height, int width);
 tree_t get_tree(int x, int y, int width, tree_t* forest);
 
-int chance(int procent,bool forest_thinning,bool is_wet);
+void chance(tree_t *tree);
 
 tree_t* check_surrounding(tree_t* forest, tree_t* surrounding, int x, int y,int width, int height);
 
