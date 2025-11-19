@@ -28,7 +28,7 @@ void make_rnd_forest(tree_t* forest, double density, int size) {
 void print_forest(tree_t* forest, int height, int width) {
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
-            switch (get_tree(i,j,width,forest).status) { //ændrer farven alt efter status på træet og så printes træet på linje 45
+            switch (get_tree(i,j,width,forest)->status) {
                 case empty:
                     color_change(BLACK);
                     break;
@@ -41,6 +41,9 @@ void print_forest(tree_t* forest, int height, int width) {
                 case burnt:
                     color_change(GREY);
                     break;
+                case wet:
+                    printf("4");
+                    break;
             }
             printf(TREE_REP);
         }
@@ -48,8 +51,15 @@ void print_forest(tree_t* forest, int height, int width) {
     }
     color_change(BLACK);
 }
-tree_t get_tree(int x, int y, int width, tree_t* forest) {
-    return forest[width * y + x];
+tree_t* get_tree(int x, int y, int width, tree_t* forest) {
+    return &forest[width * y + x];
+}
+//Når start er true starter brænden på disse x y kordinater
+void start_brand(tree_t* forest, int x, int y, int width) {
+
+    tree_t tree = get_tree(x, y, width, forest);
+    tree.status = burning;
+    //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig"
 }
 
 // a function to return a prosent chance based on different factors
@@ -69,18 +79,18 @@ tree_t get_tree(int x, int y, int width, tree_t* forest) {
     return rand() % 100 < procent;
 }
 
-tree_t* check_surrounding(tree_t* forest, tree_t* surrounding, int x, int y,int width, int height) {
-
+void check_surrounding(tree_t* forest, int x, int y,int width, int height) {
     int counter = 0;
-    for (int j = -1; j <= 1; j++) {
-        for (int i = -1; i <= 1; i++) {
-            surrounding[counter] = get_tree(x+i,y+j,width,forest);
+    tree_t* surrounding = malloc(9*sizeof(tree_t));
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            surrounding[counter] = *get_tree(x+j,y+i,width,forest);
             printf("%d",surrounding[counter].status);
             counter++;
         }
         printf("\n");
     }
-return 0;
+    free(surrounding);
 }
 
 void color_change(unsigned short color)
@@ -95,7 +105,14 @@ void scan_settings(int* width, int* height, double* density) {
         printf("Please enter a width, height, and forest density (0.00 - 1):\n");
         scanf(" %d %d %lf", width, height, density);
     } while (!(*width <= MAX_WIDTH && *width > 0 && *height <= MAX_HEIGHT && *height > 0 && *density <= 1 && *density >= 0));
+}
 
+void user_drop_water(tree_t* forest, int x, int y, int width) {
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            get_tree(x+j,y+i,width,forest)->status = wet;
+        }
+    }
 }
 
 void user_click_input(int *x, int *y)
@@ -177,3 +194,22 @@ void console_setup()
     ShowWindow(consoleWindow, SW_MAXIMIZE); // this mimics clicking on its' maximize button
 }
 
+void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zone) {
+    if (size_of_dead_zone + x < width || size_of_dead_zone - x >= 0){
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+            get_tree(x+j,y-size_of_dead_zone,width,forest)->status = empty;
+        }
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+            get_tree(x+j,y+size_of_dead_zone,width,forest)->status = empty;
+        }
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+            get_tree(x-size_of_dead_zone,y+j,width, forest)->status = empty;
+        }
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+            get_tree(x+size_of_dead_zone,y+j,width, forest)->status = empty;
+        }
+    }
+    else {
+        printf("Input Error: dead_zone exceeds forest\n");
+    }
+}
