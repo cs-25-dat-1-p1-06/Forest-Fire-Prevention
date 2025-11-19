@@ -16,6 +16,7 @@ typedef struct {
 void make_rnd_forest(tree_t* forest, double density, int size);
 void print_forest(tree_t* forest, int height, int width);
 tree_t get_tree(int x, int y, int width, tree_t* forest);
+void scan_settings(int* width, int* height, double* density);
 
 void chance(tree_t *tree);
 

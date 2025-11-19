@@ -1,2 +1,1 @@
-Amogus
-Brain Brokus
+Vi har startet med at lave lidt kode. Vi har hver vores branch at arbejde på. Forest-density virker nu med at man kan indtaste skovens parametre og density som en procent. Arbejd gerne ud fra den hvis det er.
