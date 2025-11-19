@@ -6,8 +6,9 @@
 #include <time.h>
 
 int main(void) {
-
     srand(time(NULL));
+    console_setup();
+
     int width, height;
     double density;
     scan_settings(&width, &height, &density);
