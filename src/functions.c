@@ -1,20 +1,23 @@
-//
-// Created by oskar on 03-11-2025.
-//
-
 #include "functions.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
 #include <math.h>
-#include <time.h>
-#include <stdbool.h>
+
 #define MAX_WIDTH 500
 #define MAX_HEIGHT 100
+
+#define GREEN BACKGROUND_GREEN
+#define RED BACKGROUND_RED
+#define WHITE BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE
+#define GREY BACKGROUND_INTENSITY
+#define BLACK 0
+#define TREE_REP "  "
 
 
 void make_rnd_forest(tree_t* forest, double density, int size) {
     for (int i = 0; i < size; i++) {
-        if (rand() % 100 < density*100){
+        if (rand() % 100 < density * 100){
             forest[i].status = 1;
         }
         else {
@@ -27,32 +30,41 @@ void print_forest(tree_t* forest, int height, int width) {
         for (int i = 0; i < width; i++) {
             switch (get_tree(i,j,width,forest)->status) {
                 case empty:
-                    printf("0");
+                    color_change(BLACK);
                     break;
                 case fresh:
-                    printf("1");
+                    color_change(GREEN);
                     break;
                 case burning:
-                    printf("2");
+                    color_change(RED);
                     break;
                 case burnt:
-                    printf("3");
+                    color_change(GREY);
                     break;
                 case wet:
                     printf("4");
                     break;
             }
+            printf(TREE_REP);
         }
         printf("\n");
     }
+    color_change(BLACK);
 }
 tree_t* get_tree(int x, int y, int width, tree_t* forest) {
     return &forest[width * y + x];
 }
+//Når start er true starter brænden på disse x y kordinater
+void start_brand(tree_t* forest, int x, int y, int width) {
+
+    tree_t tree = get_tree(x, y, width, forest);
+    tree.status = burning;
+    //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig"
+}
 
 // a function to return a prosent chance based on different factors
 
- int chance(int procent,bool forest_thinning,bool is_wet) {
+ int chance(int procent, int forest_thinning, int is_wet) {
 
     if (forest_thinning) {
         procent = procent-25;
@@ -80,6 +92,14 @@ void check_surrounding(tree_t* forest, int x, int y,int width, int height) {
     }
     free(surrounding);
 }
+
+void color_change(unsigned short color)
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    SetConsoleTextAttribute(hConsole, color);
+}
+
 void scan_settings(int* width, int* height, double* density) {
     do{
         printf("Please enter a width, height, and forest density (0.00 - 1):\n");
