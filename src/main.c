@@ -18,7 +18,7 @@ int main(void) {
     print_forest(forest, height, width);
 
     //Initiliasere vind
-    struct Wind *wind = (struct Wind*) malloc(sizeof(struct Wind));
+    wind_t *wind = (wind_t*) malloc(sizeof(wind_t));
 
     //Tjekker om allokeringen var en success
     if (wind == NULL) {
