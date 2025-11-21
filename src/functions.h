@@ -26,9 +26,16 @@ void console_setup();
 
 void chance(tree_t *tree);
 
-void check_surrounding(tree_t* forest, int x, int y,int width, int height);
+int check_surrounding_firestrength(tree_t* forest, int x, int y,int width, int height);
 void user_drop_water(tree_t* forest, int x, int y, int width);
 void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zone);
+void tick(tree_t* forest, int height, int width);
+void burndown(tree_t* forest, int height, int width);
+void fire_spread(tree_t* forest, int height, int width);
+int check_surrounding_burning(tree_t* forest, int width, int x, int y);
+double calculate_risk_of_burning();
+
+
 
 void status_text(wind_t* wind, tree_t* forest, int height, int width);
 
