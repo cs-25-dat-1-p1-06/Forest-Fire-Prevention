@@ -1,0 +1,8 @@
+//
+// Created by nickl on 21-11-2025.
+//
+
+#ifndef FOREST_FIRE_PREVENTION_INPUT_H
+#define FOREST_FIRE_PREVENTION_INPUT_H
+
+#endif //FOREST_FIRE_PREVENTION_INPUT_H
