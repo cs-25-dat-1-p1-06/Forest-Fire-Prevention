@@ -24,7 +24,7 @@ void console_setup();
 
 void chance(tree_t *tree);
 
-void check_surrounding(tree_t* forest, int x, int y,int width, int height);
+int check_surrounding_firestrength(tree_t* forest, int x, int y,int width, int height);
 void user_drop_water(tree_t* forest, int x, int y, int width);
 void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zone);
 

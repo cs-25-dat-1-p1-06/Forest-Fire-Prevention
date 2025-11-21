@@ -64,19 +64,77 @@ void start_brand(tree_t* forest, int x, int y, int width) {
 // a function to return a prosent chance based on different factors
 
 
-void check_surrounding(tree_t* forest, int x, int y,int width, int height) {
-    int counter = 0;
-    tree_t* surrounding = malloc(9*sizeof(tree_t));
-    for (int i = -1; i <= 1; i++) {
-        for (int j = -1; j <= 1; j++) {
-            surrounding[counter] = *get_tree(x+j,y+i,width,forest);
-            printf("%d",surrounding[counter].status);
-            counter++;
+int check_surrounding_firestrength(tree_t* forest, int x, int y,int width, int height) {
+    int total_firestrength = 0;
+    for (int i = -1; i <= 1 && y + i < height; i++) {
+        if (y + i > 0) {
+            for (int j = -1; j <= 1 && x + j < width; j++) {
+                if (x + j > 0) {
+                    tree_t* tree = get_tree(x + j, y + i, width, forest);
+                    if (tree->status == burning) {
+                        total_firestrength += tree->fire_strength;
+                    }
+                }
+            }
         }
-        printf("\n");
     }
-    free(surrounding);
+    return total_firestrength;
 }
+
+double calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int height) {
+    double chance=0.0;
+    int fire_strength= check_surrounding_firestrength(forest, x, y, width, height);
+
+    if (fire_strength >= 1 && fire_strength <= 5) {
+        chance+= 10;
+    }
+    if (fire_strength >= 6 && fire_strength <= 10) {
+        chance+= 20;
+    }
+    if (fire_strength >= 11 && fire_strength <= 15) {
+        chance+= 30;
+    }
+    if (fire_strength >= 16 && fire_strength <= 20) {
+        chance+= 40;
+    }
+    if (fire_strength >= 21 && fire_strength <= 25) {
+        chance+= 50;
+    }
+    if (fire_strength >= 26 && fire_strength <= 30) {
+        chance+= 60;
+    }
+    if (fire_strength >= 31 && fire_strength <= 35) {
+        chance+= 70;
+    }
+    if (fire_strength >= 36 && fire_strength <= 40) {
+        chance+= 80;
+    }
+
+    switch (forest->humidity) {
+        case(1): chance-=10; break;
+        case(2): chance-=20; break;
+        case(3): chance-=30; break;
+        case(4): chance-=40; break;
+        case(5): chance-=50; break;
+    }
+    return chance;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void color_change(unsigned short color)
 {
@@ -100,42 +158,66 @@ void user_drop_water(tree_t* forest, int x, int y, int width) {
     }
 }
 
-void chance(tree_t *surrounding) {
-    tree_t center = surrounding[4];
 
-    for (int i = 0; i < 9; i++) {
-        if (i == 4) continue;
-        tree_t *neighbor = &surrounding[i];
-        if (neighbor->status != fresh) continue;
 
-        int chance = 30;
+int chance2(tree_t forest1, tree_t forest2) {
+    tree_t base_tree = forest1;
+    tree_t target_tree = forest2;
 
-        switch (center.fire_strength) {
-            case 1: chance +=5; break;
-            case 2: chance +=10; break;
-            case 3: chance +=15; break;
-            case 4: chance +=20; break;
-            case 5: chance +=25; break;
-        }
-        switch (neighbor->humidity) {
-            case 0: chance-=0; break;
-            case 1: chance-=10; break;
-            case 2: chance-=20; break;
-            case 3: chance-=30; break;
-            case 4: chance-=40; break;
-            case 5: chance-=50; break;
-        }
+    int chance=30;
+    switch (base_tree.fire_strength) {
+        case 1: chance +=5; break;
+        case 2: chance +=10; break;
+        case 3: chance +=15; break;
+        case 4: chance +=20; break;
+        case 5: chance +=25; break;
 
-        int roll = rand() % 100;
+            switch (target_tree.humidity) {
+                case 1: chance +=5; break;
+                case 2: chance +=10; break;
+                case 3: chance +=15; break;
+                case 4: chance +=20; break;
+                case 5: chance +=25; break;
+                default: chance +=30; break;
 
-        if (roll < chance) {
-            neighbor->status = burning;
-            printf("Tree %d caught fire. Chance = %d Roll = %d \n",i,chance,roll);
-        } else {
-            printf("Tree %d did NOT catch fire. Chance = %d Roll %d \n",i,chance,roll);
-        }
+                    return chance;
+
+            }
     }
 }
+
+void catch_fire(tree_t *surrounding,tree_t target_tree) {
+    int chance = 30;
+
+
+
+    for (int i =1; i < 9; i++) {
+        if (i==4) continue;
+
+        tree_t *neighbor = &surrounding[i];
+        chance += chance2(target_tree,*neighbor);
+        printf("added %d\n",chance);
+    }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 void user_click_input(int *x, int *y)
 {
