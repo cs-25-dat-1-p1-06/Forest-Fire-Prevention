@@ -237,4 +237,37 @@ void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zo
         printf("Input Error: dead_zone exceeds forest\n");
     }
 }
+int get_trees_amount(tree_t* forest, int height, int width,const char* status_str) {
+    int counter=0;
+    status_e target;
 
+    // Oversæt tekst til enum
+    if (strcmp(status_str, "empty") == 0) target = empty;
+    else if (strcmp(status_str, "fresh") == 0) target = fresh;
+    else if (strcmp(status_str, "burning") == 0) target = burning;
+    else if (strcmp(status_str, "burnt") == 0) target = burnt;
+    else if (strcmp(status_str, "wet") == 0) target = wet;
+    else return -1; // Ukendt status
+
+    // Loop igennem alle træer
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
+            tree_t* t = get_tree(i, j, width, forest);
+            if (t->status == target) {
+                counter++;
+            }
+        }
+    }
+
+    return counter;
+}
+void status_text(wind_t* wind, tree_t* forest, int height, int width) {
+    printf("Status:\n");
+    print_wind(wind);
+
+    int fresh_count = get_trees_amount(forest, height, width, "fresh");
+    int burnt_count = get_trees_amount(forest, height, width, "burnt");
+
+    printf("Fresh trees: %d\n", fresh_count);
+    printf("Burnt trees: %d\n", burnt_count);
+}

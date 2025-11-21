@@ -1,5 +1,5 @@
 #include "functions.h"
-#include "wind.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -26,6 +26,8 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
     start_wind(wind);
+    status_text(wind, forest,height,width);
+
     free(forest);
     free(wind);
 
