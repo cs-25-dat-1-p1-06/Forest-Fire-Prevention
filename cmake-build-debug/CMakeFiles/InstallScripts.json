@@ -1,9 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"C:/Users/hartv/Desktop/Programmering/Projekter/Forest-Fire-Prevention/cmake-build-debug/cmake_install.cmake",
-		"C:/Users/hartv/Desktop/Programmering/Projekter/Forest-Fire-Prevention/cmake-build-debug/src/cmake_install.cmake",
-		"C:/Users/hartv/Desktop/Programmering/Projekter/Forest-Fire-Prevention/cmake-build-debug/test/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
