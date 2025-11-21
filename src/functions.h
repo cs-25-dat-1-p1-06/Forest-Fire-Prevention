@@ -17,8 +17,6 @@ tree_t* get_tree(int x, int y, int width, tree_t* forest);
 void scan_settings(int* width, int* height, double* density);
 void color_change(unsigned short color);
 
-int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y);
-void user_click_input(int *x, int *y);
 void console_setup();
 
 
