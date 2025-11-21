@@ -123,22 +123,6 @@ double calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int hei
     return chance;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void color_change(unsigned short color)
 {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -312,3 +296,11 @@ int check_surrounding_burning(tree_t* forest, int width, int x, int y) {
     }
     return burning_trees_counter;
 }
+
+void spread(tree_t* forest, int width, int height, int x, int y) {
+    tree_t *tree = get_tree(x,y,width,forest);
+    if (calculate_risk_of_burning(forest, x, y, width,height ==1)) {
+        tree->status = burning;
+    }
+}
+
