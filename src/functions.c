@@ -14,6 +14,7 @@
 #define BLACK 0
 #define TREE_REP "  "
 
+#define RATE_OF_BURN 0.2
 
 void make_rnd_forest(tree_t* forest, double density, int size) {
     for (int i = 0; i < size; i++) {
@@ -56,7 +57,7 @@ void print_forest(tree_t* forest, int height, int width) {
 tree_t* get_tree(int x, int y, int width, tree_t* forest) {
     return &forest[width * y + x];
 }
-//Når start er true starter brænden på disse x y kordinater
+//Når start er true starter brænden på disse x y koordinater
 void start_brand(tree_t* forest, int x, int y, int width) {
     tree_t *tree = get_tree(x, y, width, forest);
     tree->status = burning;
@@ -66,19 +67,77 @@ void start_brand(tree_t* forest, int x, int y, int width) {
 // a function to return a prosent chance based on different factors
 
 
-void check_surrounding(tree_t* forest, int x, int y,int width, int height) {
-    int counter = 0;
-    tree_t* surrounding = malloc(9*sizeof(tree_t));
-    for (int i = -1; i <= 1; i++) {
-        for (int j = -1; j <= 1; j++) {
-            surrounding[counter] = *get_tree(x+j,y+i,width,forest);
-            printf("%d",surrounding[counter].status);
-            counter++;
+int check_surrounding_firestrength(tree_t* forest, int x, int y,int width, int height) {
+    int total_firestrength = 0;
+    for (int i = -1; i <= 1 && y + i < height; i++) {
+        if (y + i > 0) {
+            for (int j = -1; j <= 1 && x + j < width; j++) {
+                if (x + j > 0) {
+                    tree_t* tree = get_tree(x + j, y + i, width, forest);
+                    if (tree->status == burning) {
+                        total_firestrength += tree->fire_strength;
+                    }
+                }
+            }
         }
-        printf("\n");
     }
-    free(surrounding);
+    return total_firestrength;
 }
+
+double calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int height) {
+    double chance=0.0;
+    int fire_strength= check_surrounding_firestrength(forest, x, y, width, height);
+
+    if (fire_strength >= 1 && fire_strength <= 5) {
+        chance+= 10;
+    }
+    if (fire_strength >= 6 && fire_strength <= 10) {
+        chance+= 20;
+    }
+    if (fire_strength >= 11 && fire_strength <= 15) {
+        chance+= 30;
+    }
+    if (fire_strength >= 16 && fire_strength <= 20) {
+        chance+= 40;
+    }
+    if (fire_strength >= 21 && fire_strength <= 25) {
+        chance+= 50;
+    }
+    if (fire_strength >= 26 && fire_strength <= 30) {
+        chance+= 60;
+    }
+    if (fire_strength >= 31 && fire_strength <= 35) {
+        chance+= 70;
+    }
+    if (fire_strength >= 36 && fire_strength <= 40) {
+        chance+= 80;
+    }
+
+    switch (forest->humidity) {
+        case(1): chance-=10; break;
+        case(2): chance-=20; break;
+        case(3): chance-=30; break;
+        case(4): chance-=40; break;
+        case(5): chance-=50; break;
+    }
+    return chance;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void color_change(unsigned short color)
 {
@@ -102,43 +161,6 @@ void user_drop_water(tree_t* forest, int x, int y, int width) {
     }
 }
 
-void chance(tree_t *surrounding) {
-    tree_t center = surrounding[4];
-
-    for (int i = 0; i < 9; i++) {
-        if (i == 4) continue;
-        tree_t *neighbor = &surrounding[i];
-        if (neighbor->status != fresh) continue;
-
-        int chance = 30;
-
-        switch (center.fire_strength) {
-            case 1: chance +=5; break;
-            case 2: chance +=10; break;
-            case 3: chance +=15; break;
-            case 4: chance +=20; break;
-            case 5: chance +=25; break;
-        }
-        switch (neighbor->humidity) {
-            case 0: chance-=0; break;
-            case 1: chance-=10; break;
-            case 2: chance-=20; break;
-            case 3: chance-=30; break;
-            case 4: chance-=40; break;
-            case 5: chance-=50; break;
-        }
-
-        int roll = rand() % 100;
-
-        if (roll < chance) {
-            neighbor->status = burning;
-            printf("Tree %d caught fire. Chance = %d Roll = %d \n",i,chance,roll);
-        } else {
-            printf("Tree %d did NOT catch fire. Chance = %d Roll %d \n",i,chance,roll);
-        }
-    }
-}
-
 void user_click_input(int *x, int *y)
 {
     DWORD fdwSaveOldMode;
@@ -157,7 +179,7 @@ void user_click_input(int *x, int *y)
         exit(EXIT_FAILURE);
 
     // Enable the window and mouse input events.
-    // Disable quick edit mode because it interfers with receiving mouse inputs.
+    // Disable quick edit mode because it interferes with receiving mouse inputs.
     fdwMode = (ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE;
     if (! SetConsoleMode(hStdin, fdwMode) )
         exit(EXIT_FAILURE);
@@ -179,7 +201,7 @@ void user_click_input(int *x, int *y)
             switch(irInBuf[i].EventType)
             {
             case MOUSE_EVENT: // mouse input
-                if (MouseEventProc(irInBuf[i].Event.MouseEvent, x, y)) //loop will run indefinetly until user clicks somewhere
+                if (MouseEventProc(irInBuf[i].Event.MouseEvent, x, y)) //loop will run indefinitely until user clicks somewhere
                 {
                     // Restore input mode on exit.
                     SetConsoleMode(hStdin, fdwSaveOldMode);
@@ -215,7 +237,7 @@ void console_setup()
 
     //maximizes window
     HWND consoleWindow = GetConsoleWindow(); // This gets the value Windows uses to identify your output window
-    ShowWindow(consoleWindow, SW_MAXIMIZE); // this mimics clicking on its' maximize button
+    ShowWindow(consoleWindow, SW_MAXIMIZE); // this mimics clicking on its maximize button
 }
 
 void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zone) {
@@ -237,4 +259,56 @@ void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zo
         printf("Input Error: dead_zone exceeds forest\n");
     }
 }
+//Laver en tick funktion der håndterer alt der skal ske når et tick foregår.
+void tick(tree_t* forest, int height, int width) {
+    //Vi vil have at brændende træer mister brændstof, og at ilden spreder sig.
+    burndown(forest, height, width);
+    fire_spread(forest, height, width);
+}
+//Burndown: For hvert træ der brænder, mister den brændstof med RATE_OF_BURN.
+void burndown(tree_t* forest, int height, int width) {
+    for (int i = 0; i < height; i++ ) {
+        for (int j = 0; j < width; j++) {
+            if (get_tree(j, i, width, forest)->status == burning) {
+                get_tree(j, i, width, forest)->fuel_left -= RATE_OF_BURN;
+            }
+            //Hvis brændstof er 0, ændres status til burnt.
+            if (get_tree(j, i, width, forest)->fuel_left == 0) {
+                get_tree(j, i, width, forest)->status = burnt;
+            }
+        }
+    }
+}
+/*Fire_spread: Funktion der for hvert træ, checker alle træer der omringer det,
+ *og fra en sandsynlighed får træet til at brænde*/
+void fire_spread(tree_t* forest, int height, int width) {
+    double risk_of_burning;
+    tree_t* center_tree;
+    int num_of_burning_trees;
 
+    for (int i = 0; i < height; i++ ) {
+        for (int j = 0; j < width; j++) {
+            center_tree = get_tree(j, i, width, forest);
+            num_of_burning_trees = check_surrounding_burning(forest, width, j, i);
+            risk_of_burning = calculate_risk_of_burning();
+        }
+    }
+}
+//Function to check the amount of burning trees surrounding a given tree
+int check_surrounding_burning(tree_t* forest, int width, int x, int y) {
+    int burning_trees_counter = 0;
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            if (get_tree(j+x, i+y, width, forest) == NULL) {
+                continue;
+            }
+            if (i == 0 && j == 0) {
+                continue;
+            }
+            if (get_tree(j+x, i+y, width, forest)->status == burning) {
+                burning_trees_counter++;
+            }
+        }
+    }
+    return burning_trees_counter;
+}
