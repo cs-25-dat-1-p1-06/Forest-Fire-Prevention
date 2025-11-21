@@ -310,7 +310,7 @@ void fire_spread(tree_t* forest, int height, int width) {
         for (int j = 0; j < width; j++) {
             center_tree = get_tree(j, i, width, forest);
             num_of_burning_trees = check_surrounding_burning(forest, width, j, i);
-            risk_of_burning = calculate_risk_of_burning();
+            //risk_of_burning = calculate_risk_of_burning();
         }
     }
 }
