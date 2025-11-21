@@ -1,10 +1,10 @@
 typedef enum {NORTH,EAST,SOUTH,WEST} wind_e;
-struct Wind{
+typedef struct{
     wind_e direction;
     double speed;
-};
-void start_wind(struct Wind* wind);
-void print_wind(struct Wind* wind);
-void update_wind(struct Wind* wind);
-void update_wind_direction(struct Wind* wind);
-void update_wind_speed(struct Wind* wind);
+}wind_t;
+void start_wind(wind_t* wind);
+void print_wind(wind_t* wind);
+void update_wind(wind_t* wind);
+void update_wind_direction(wind_t* wind);
+void update_wind_speed(wind_t* wind);

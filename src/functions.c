@@ -9,7 +9,7 @@
 
 #define GREEN BACKGROUND_GREEN
 #define RED BACKGROUND_RED
-#define WHITE (BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE)
+#define WHITE FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE
 #define GREY BACKGROUND_INTENSITY
 #define BLACK 0
 #define TREE_REP "  "
@@ -50,7 +50,9 @@ void print_forest(tree_t* forest, int height, int width) {
         }
         printf("\n");
     }
+    printf("\n");
     color_change(BLACK);
+    color_change(WHITE);
 }
 tree_t* get_tree(int x, int y, int width, tree_t* forest) {
     return &forest[width * y + x];
