@@ -11,14 +11,7 @@ int main(void) {
     int width, height;
     double density;
     scan_settings(&width, &height, &density);
-
-    console_setup();
-    tree_t* forest = malloc(width*height*sizeof(tree_t));
-    make_rnd_forest(forest, density, width*height);
-    print_forest(forest, height, width);
-    system("pause");
-
-    //Initiliasere vind
+    //Initialisere vind
     struct Wind *wind = (struct Wind*) malloc(sizeof(struct Wind));
 
     //Tjekker om allokeringen var en success
@@ -27,9 +20,16 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
     start_wind(wind);
+
+    console_setup();
+    tree_t* forest = malloc(width*height*sizeof(tree_t));
+    make_rnd_forest(forest, density, width*height);
+    print_forest(forest, height, width);
+    system("pause");
+
     free(forest);
     free(wind);
-    
+
     return 0;
 }
 
