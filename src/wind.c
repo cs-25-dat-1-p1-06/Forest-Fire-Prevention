@@ -8,7 +8,6 @@
 
 void start_wind(wind_t* wind) {
     update_wind(wind);
-    print_wind(wind);
 }
 
 void update_wind(wind_t* wind) {

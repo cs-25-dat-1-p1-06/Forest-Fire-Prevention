@@ -1,5 +1,5 @@
 #include "functions.h"
-#include "wind.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -26,12 +26,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
     start_wind(wind);
-
-    console_setup();
-    tree_t* forest = malloc(width*height*sizeof(tree_t));
-    make_rnd_forest(forest, density, width*height);
-    print_forest(forest, height, width);
-    system("pause");
+    status_text(wind, forest,height,width);
 
     free(forest);
     free(wind);
