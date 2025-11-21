@@ -1,9 +1,14 @@
 #include "functions.h"
-
+#include "wind.h"
+#include "input.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include "input.h"
+
+
+
 
 int main(void) {
     srand(time(NULL));

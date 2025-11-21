@@ -145,68 +145,41 @@ void user_drop_water(tree_t* forest, int x, int y, int width) {
     }
 }
 
-void user_click_input(int *x, int *y)
-{
-    DWORD fdwSaveOldMode;
-    HANDLE hStdin;
+void chance(tree_t *surrounding) {
+    tree_t center = surrounding[4];
 
-    DWORD cNumRead, fdwMode, i;
-    INPUT_RECORD irInBuf[128];
+    for (int i = 0; i < 9; i++) {
+        if (i == 4) continue;
+        tree_t *neighbor = &surrounding[i];
+        if (neighbor->status != fresh) continue;
 
-    // Get the standard input handle.
-    hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    if (hStdin == INVALID_HANDLE_VALUE)
-        exit(EXIT_FAILURE);
+        int chance = 30;
 
-    // Save the current input mode, to be restored on exit.
-    if (! GetConsoleMode(hStdin, &fdwSaveOldMode) )
-        exit(EXIT_FAILURE);
+        switch (center.fire_strength) {
+            case 1: chance +=5; break;
+            case 2: chance +=10; break;
+            case 3: chance +=15; break;
+            case 4: chance +=20; break;
+            case 5: chance +=25; break;
+        }
+        switch (neighbor->humidity) {
+            case 0: chance-=0; break;
+            case 1: chance-=10; break;
+            case 2: chance-=20; break;
+            case 3: chance-=30; break;
+            case 4: chance-=40; break;
+            case 5: chance-=50; break;
+        }
 
-    // Enable the window and mouse input events.
-    // Disable quick edit mode because it interferes with receiving mouse inputs.
-    fdwMode = (ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE;
-    if (! SetConsoleMode(hStdin, fdwMode) )
-        exit(EXIT_FAILURE);
+        int roll = rand() % 100;
 
-
-    while (1)
-    {
-        // Wait for the events.
-        if (! ReadConsoleInput(
-                hStdin,      // input buffer handle
-                irInBuf,     // buffer to read into
-                128,         // size of read buffer
-                &cNumRead) ) // number of records read
-                    exit(EXIT_FAILURE);
-
-        // Dispatch the events to the appropriate handler.
-        for (i = 0; i < cNumRead; i++)
-        {
-            switch(irInBuf[i].EventType)
-            {
-            case MOUSE_EVENT: // mouse input
-                if (MouseEventProc(irInBuf[i].Event.MouseEvent, x, y)) //loop will run indefinitely until user clicks somewhere
-                {
-                    // Restore input mode on exit.
-                    SetConsoleMode(hStdin, fdwSaveOldMode);
-                    return;
-                }
-            default:
-                break;
-            }
+        if (roll < chance) {
+            neighbor->status = burning;
+            printf("Tree %d caught fire. Chance = %d Roll = %d \n",i,chance,roll);
+        } else {
+            printf("Tree %d did NOT catch fire. Chance = %d Roll %d \n",i,chance,roll);
         }
     }
-}
-
-int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y)
-{
-    if (mer.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-    {
-        *x = mer.dwMousePosition.X / 2;
-        *y = mer.dwMousePosition.Y;
-        return 1;
-    }
-    return 0;
 }
 
 void console_setup()
