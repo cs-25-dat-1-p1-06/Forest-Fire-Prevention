@@ -18,6 +18,7 @@ tree_t* get_tree(int x, int y, int width, tree_t* forest);
 int get_trees_amount(tree_t* forest, int height, int width,const char* status_str);
 void scan_settings(int* width, int* height, double* density);
 void color_change(unsigned short color);
+int sim_finished_check();
 
 void console_setup();
 
