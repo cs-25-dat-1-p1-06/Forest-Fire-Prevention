@@ -1,6 +1,6 @@
 #ifndef FOREST_FIRE_PREVENTION_INPUT_H
 #define FOREST_FIRE_PREVENTION_INPUT_H
-#include "functions.h"
+#include "windows.h"
 
 //gør dette variabel synlig for de filer der inkluderer denne header, så der kan tændes og slukkes for brugerens input
 extern int accept_user_input;

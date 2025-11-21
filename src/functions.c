@@ -305,3 +305,17 @@ int check_surrounding_burning(tree_t* forest, int width, int x, int y) {
     }
     return burning_trees_counter;
 }
+
+int sim_finished_check(tree_t* forest, int size)
+{
+    int counter = 0;
+    for (int i = 0; i < size; i++) {
+        if (forest[i].status == burning) {
+            counter++;
+        }
+    }
+    if (counter > 0) {
+        return 1;
+    }
+    return 0;
+}

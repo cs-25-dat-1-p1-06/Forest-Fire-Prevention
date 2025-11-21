@@ -9,10 +9,12 @@ int accept_user_input;
 //function will be run as another thread so user can make inputs while sim is running
 void* user_input_loop(int *x, int *y, int *command)
 {
+    accept_user_input = 1;
     //loop ends when code in main runs accept_user_input = 0
     while (accept_user_input)
     {
         //code loop for user input
+        user_input(x, y, command);
     }
     return NULL;
 }
