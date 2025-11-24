@@ -1,6 +1,10 @@
 #include "input.h"
 #include <stddef.h>
+#include <stdio.h>
 #include <windows.h>
+
+#define MAX_WIDTH 500
+#define MAX_HEIGHT 100
 
 //global variable changeable by any .c file that includes this library.
 int accept_user_input;
@@ -107,6 +111,13 @@ int KeyEventProc(KEY_EVENT_RECORD ker, int *command)
         return 1;
     }
     return 0;
+}
+
+void scan_settings(int* width, int* height, double* density) {
+    do {
+        printf("Please enter a width, height, and forest density (0.00 - 1):\n");
+        scanf(" %d %d %lf", width, height, density);
+    } while (!(*width <= MAX_WIDTH && *width > 0 && *height <= MAX_HEIGHT && *height > 0 && *density <= 1 && *density >= 0));
 }
 
 

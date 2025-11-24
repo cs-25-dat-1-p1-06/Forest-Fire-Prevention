@@ -1,6 +1,6 @@
-#include "functions.h"
-#include "wind.h"
+#include "fire-sim.h"
 #include "input.h"
+#include "console.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -30,7 +30,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
     start_wind(wind);
-    status_text(wind, forest,height,width);
+    status_text(wind, forest, width * height);
 
     free(forest);
     free(wind);

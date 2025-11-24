@@ -1,11 +1,10 @@
-#include "functions.h"
+#include "fire-sim.h"
+#include "console.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
 #include <math.h>
 
-#define MAX_WIDTH 500
-#define MAX_HEIGHT 100
 
 #define GREEN BACKGROUND_GREEN
 #define RED BACKGROUND_RED
@@ -58,7 +57,7 @@ tree_t* get_tree(int x, int y, int width, tree_t* forest) {
     return &forest[width * y + x];
 }
 //Når start er true starter brænden på disse x y koordinater
-void start_brand(tree_t* forest, int x, int y, int width) {
+void start_fire(tree_t* forest, int x, int y, int width) {
     tree_t *tree = get_tree(x, y, width, forest);
     tree->status = burning;
     //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig"
@@ -84,57 +83,15 @@ int check_surrounding_firestrength(tree_t* forest, int x, int y,int width, int h
     return total_firestrength;
 }
 
-double calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int height) {
-    double chance=0.0;
-    int fire_strength= check_surrounding_firestrength(forest, x, y, width, height);
+int calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int height) {
+    int chance = 0.0;
+    int fire_strength = check_surrounding_firestrength(forest, x, y, width, height);
 
-    if (fire_strength >= 1 && fire_strength <= 5) {
-        chance+= 10;
-    }
-    if (fire_strength >= 6 && fire_strength <= 10) {
-        chance+= 20;
-    }
-    if (fire_strength >= 11 && fire_strength <= 15) {
-        chance+= 30;
-    }
-    if (fire_strength >= 16 && fire_strength <= 20) {
-        chance+= 40;
-    }
-    if (fire_strength >= 21 && fire_strength <= 25) {
-        chance+= 50;
-    }
-    if (fire_strength >= 26 && fire_strength <= 30) {
-        chance+= 60;
-    }
-    if (fire_strength >= 31 && fire_strength <= 35) {
-        chance+= 70;
-    }
-    if (fire_strength >= 36 && fire_strength <= 40) {
-        chance+= 80;
-    }
+    chance += ceil(fire_strength / 5) * 10;
 
-    switch (forest->humidity) {
-        case(1): chance-=10; break;
-        case(2): chance-=20; break;
-        case(3): chance-=30; break;
-        case(4): chance-=40; break;
-        case(5): chance-=50; break;
-    }
+    chance += forest->humidity * -10;
+
     return chance;
-}
-
-void color_change(unsigned short color)
-{
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    SetConsoleTextAttribute(hConsole, color);
-}
-
-void scan_settings(int* width, int* height, double* density) {
-    do{
-        printf("Please enter a width, height, and forest density (0.00 - 1):\n");
-        scanf(" %d %d %lf", width, height, density);
-    } while (!(*width <= MAX_WIDTH && *width > 0 && *height <= MAX_HEIGHT && *height > 0 && *density <= 1 && *density >= 0));
 }
 
 void user_drop_water(tree_t* forest, int x, int y, int width) {
@@ -143,58 +100,6 @@ void user_drop_water(tree_t* forest, int x, int y, int width) {
             get_tree(x+j,y+i,width,forest)->status = wet;
         }
     }
-}
-
-void chance(tree_t *surrounding) {
-    tree_t center = surrounding[4];
-
-    for (int i = 0; i < 9; i++) {
-        if (i == 4) continue;
-        tree_t *neighbor = &surrounding[i];
-        if (neighbor->status != fresh) continue;
-
-        int chance = 30;
-
-        switch (center.fire_strength) {
-            case 1: chance +=5; break;
-            case 2: chance +=10; break;
-            case 3: chance +=15; break;
-            case 4: chance +=20; break;
-            case 5: chance +=25; break;
-        }
-        switch (neighbor->humidity) {
-            case 0: chance-=0; break;
-            case 1: chance-=10; break;
-            case 2: chance-=20; break;
-            case 3: chance-=30; break;
-            case 4: chance-=40; break;
-            case 5: chance-=50; break;
-        }
-
-        int roll = rand() % 100;
-
-        if (roll < chance) {
-            neighbor->status = burning;
-            printf("Tree %d caught fire. Chance = %d Roll = %d \n",i,chance,roll);
-        } else {
-            printf("Tree %d did NOT catch fire. Chance = %d Roll %d \n",i,chance,roll);
-        }
-    }
-}
-
-void console_setup()
-{
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    //hides the cursor
-    CONSOLE_CURSOR_INFO cursorInfo;
-    GetConsoleCursorInfo(hConsole, &cursorInfo);
-    cursorInfo.bVisible = 0; // set the cursor visibility
-    SetConsoleCursorInfo(hConsole, &cursorInfo);
-
-    //maximizes window
-    HWND consoleWindow = GetConsoleWindow(); // This gets the value Windows uses to identify your output window
-    ShowWindow(consoleWindow, SW_MAXIMIZE); // this mimics clicking on its maximize button
 }
 
 void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zone) {
@@ -217,36 +122,24 @@ void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zo
     }
 }
 
-int get_trees_amount(tree_t* forest, int height, int width,const char* status_str) {
-    int counter=0;
-    status_e target;
-
-    // Oversæt tekst til enum
-    if (strcmp(status_str, "empty") == 0) target = empty;
-    else if (strcmp(status_str, "fresh") == 0) target = fresh;
-    else if (strcmp(status_str, "burning") == 0) target = burning;
-    else if (strcmp(status_str, "burnt") == 0) target = burnt;
-    else if (strcmp(status_str, "wet") == 0) target = wet;
-    else return -1; // Ukendt status
+int get_trees_amount(tree_t* forest, int size, status_e target) {
+    int counter = 0;
 
     // Loop igennem alle træer
-    for (int j = 0; j < height; j++) {
-        for (int i = 0; i < width; i++) {
-            tree_t* t = get_tree(i, j, width, forest);
-            if (t->status == target) {
-                counter++;
-            }
+    for (int i = 0; i < size; i++) {
+        if (forest[i].status == target) {
+            counter++;
         }
     }
 
     return counter;
 }
-void status_text(wind_t* wind, tree_t* forest, int height, int width) {
+void status_text(wind_t* wind, tree_t* forest, int size) {
     printf("Status:\n");
     print_wind(wind);
 
-    int fresh_count = get_trees_amount(forest, height, width, "fresh");
-    int burnt_count = get_trees_amount(forest, height, width, "burnt");
+    int fresh_count = get_trees_amount(forest, size, fresh);
+    int burnt_count = get_trees_amount(forest, size, burnt);
 
     printf("Fresh trees: %d\n", fresh_count);
     printf("Burnt trees: %d\n", burnt_count);
@@ -308,14 +201,11 @@ int check_surrounding_burning(tree_t* forest, int width, int x, int y) {
 
 int sim_finished_check(tree_t* forest, int size)
 {
-    int counter = 0;
-    for (int i = 0; i < size; i++) {
-        if (forest[i].status == burning) {
-            counter++;
-        }
-    }
+    int counter = get_trees_amount(forest, size, burning);
+
     if (counter > 0) {
         return 1;
     }
+
     return 0;
 }
