@@ -26,6 +26,7 @@ void make_rnd_forest(tree_t* forest, double density, int size) {
         }
     }
 }
+
 void print_forest(tree_t* forest, int height, int width) {
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
@@ -86,42 +87,16 @@ int check_surrounding_firestrength(tree_t* forest, int x, int y,int width, int h
 
 double calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int height) {
     double chance=0.0;
-    int fire_strength= check_surrounding_firestrength(forest, x, y, width, height);
+    int fire_strength = check_surrounding_firestrength(forest, x, y, width, height);
 
-    if (fire_strength >= 1 && fire_strength <= 5) {
-        chance+= 10;
-    }
-    if (fire_strength >= 6 && fire_strength <= 10) {
-        chance+= 20;
-    }
-    if (fire_strength >= 11 && fire_strength <= 15) {
-        chance+= 30;
-    }
-    if (fire_strength >= 16 && fire_strength <= 20) {
-        chance+= 40;
-    }
-    if (fire_strength >= 21 && fire_strength <= 25) {
-        chance+= 50;
-    }
-    if (fire_strength >= 26 && fire_strength <= 30) {
-        chance+= 60;
-    }
-    if (fire_strength >= 31 && fire_strength <= 35) {
-        chance+= 70;
-    }
-    if (fire_strength >= 36 && fire_strength <= 40) {
-        chance+= 80;
-    }
+    chance+=5*fire_strength;
+    int humidity = forest->humidity;
+    chance-=5*humidity;
 
-    switch (forest->humidity) {
-        case(1): chance-=10; break;
-        case(2): chance-=20; break;
-        case(3): chance-=30; break;
-        case(4): chance-=40; break;
-        case(5): chance-=50; break;
-    }
     return chance;
 }
+
+
 
 void color_change(unsigned short color)
 {
@@ -274,7 +249,7 @@ void fire_spread(tree_t* forest, int height, int width) {
         for (int j = 0; j < width; j++) {
             center_tree = get_tree(j, i, width, forest);
             num_of_burning_trees = check_surrounding_burning(forest, width, j, i);
-            risk_of_burning = calculate_risk_of_burning();
+            risk_of_burning = calculate_risk_of_burning( forest,j,i,width, height);
         }
     }
 }
@@ -297,10 +272,16 @@ int check_surrounding_burning(tree_t* forest, int width, int x, int y) {
     return burning_trees_counter;
 }
 
-void spread(tree_t* forest, int width, int height, int x, int y) {
+tree_t spread(tree_t* forest, int width, int height, int x, int y) {
     tree_t *tree = get_tree(x,y,width,forest);
     if (calculate_risk_of_burning(forest, x, y, width,height ==1)) {
         tree->status = burning;
     }
 }
+
+void simulate(tree_t* forest, int width, int height) {
+
+}
+
+
 
