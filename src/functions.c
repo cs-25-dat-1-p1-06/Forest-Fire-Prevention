@@ -222,7 +222,10 @@ void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zo
 void tick(tree_t* forest, int height, int width) {
     //Vi vil have at brændende træer mister brændstof, og at ilden spreder sig.
     burndown(forest, height, width);
-    fire_spread(forest, height, width);
+    int* trees_to_burn = scan_forest_spread(forest, height, width);
+    if (!(trees_to_burn == NULL)) {
+        spread(forest, height, width, trees_to_burn);
+    }
 }
 //Burndown: For hvert træ der brænder, mister den brændstof med RATE_OF_BURN.
 void burndown(tree_t* forest, int height, int width) {
@@ -238,21 +241,30 @@ void burndown(tree_t* forest, int height, int width) {
         }
     }
 }
+
+
 /*Fire_spread: Funktion der for hvert træ, checker alle træer der omringer det,
  *og fra en sandsynlighed får træet til at brænde*/
-void fire_spread(tree_t* forest, int height, int width) {
+int* scan_forest_spread(tree_t* forest, int height, int width) {
     double risk_of_burning;
-    tree_t* center_tree;
-    int num_of_burning_trees;
+    int* trees_to_burn = malloc(sizeof(int) * height * width);
+    int counter = 0;
 
     for (int i = 0; i < height; i++ ) {
         for (int j = 0; j < width; j++) {
-            center_tree = get_tree(j, i, width, forest);
-            num_of_burning_trees = check_surrounding_burning(forest, width, j, i);
+            if (get_tree(j, i, width, forest)->status == burning) {
+                continue;
+            }
             risk_of_burning = calculate_risk_of_burning( forest,j,i,width, height);
+            if (rand() % 100 < risk_of_burning) {
+                trees_to_burn[counter] = i * width + j;
+                counter++;
+            }
         }
     }
+    return trees_to_burn;
 }
+
 //Function to check the amount of burning trees surrounding a given tree
 int check_surrounding_burning(tree_t* forest, int width, int x, int y) {
     int burning_trees_counter = 0;
@@ -272,16 +284,12 @@ int check_surrounding_burning(tree_t* forest, int width, int x, int y) {
     return burning_trees_counter;
 }
 
-tree_t spread(tree_t* forest, int width, int height, int x, int y) {
-    tree_t *tree = get_tree(x,y,width,forest);
-    if (calculate_risk_of_burning(forest, x, y, width,height ==1)) {
-        tree->status = burning;
+void spread(tree_t* forest, int height, int width, int* trees_to_burn) {
+    for (int i = 0; i <= width*height; i++) {
+        if (&trees_to_burn[i] == NULL) {
+            continue;
+        }
+        forest[trees_to_burn[i]].status = burning;
     }
+    free (trees_to_burn);
 }
-
-void simulate(tree_t* forest, int width, int height) {
-
-}
-
-
-
