@@ -23,5 +23,6 @@ void user_input(int *x, int *y, int *command);
 int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y);
 int KeyEventProc(KEY_EVENT_RECORD ker, int *command);
 
+void scan_settings(int* width, int* height, double* density);
 
 #endif //FOREST_FIRE_PREVENTION_INPUT_H
