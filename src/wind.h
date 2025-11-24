@@ -1,5 +1,5 @@
-#ifndef FOREST_FIRE_PREVENTION_INPUT_H
-#define FOREST_FIRE_PREVENTION_INPUT_H
+#ifndef FOREST_FIRE_PREVENTION_WIND_H
+#define FOREST_FIRE_PREVENTION_WIND_H
 typedef enum {NORTH, EAST, SOUTH, WEST} wind_e;
 typedef struct {
     wind_e direction;
@@ -11,4 +11,4 @@ void update_wind(wind_t* wind);
 void update_wind_direction(wind_t* wind);
 void update_wind_speed(wind_t* wind);
 
-#endif //FOREST_FIRE_PREVENTION_INPUT_H
+#endif //FOREST_FIRE_PREVENTION_WIND_H
