@@ -16,7 +16,7 @@ void update_wind(wind_t* wind) {
 }
 void print_wind(wind_t* wind) {
     //Char array til at match med direction samt Unicode symbol for retning
-    const char* direction[4] = {"NORTH \U00002191","EAST \U00002192","SOUTH \U00002192","WEST \U00002190"};
+    const char* direction[4] = {"NORTH \U00002191","EAST \U00002192","SOUTH \U00002193","WEST \U00002190"};
     printf("Wind direction: %s\n",direction[wind->direction]);
     printf("Wind speed: %lf m/s\n",wind->speed);
 }
