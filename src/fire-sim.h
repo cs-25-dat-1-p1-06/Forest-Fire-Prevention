@@ -1,5 +1,5 @@
-#ifndef FOREST_FIRE_PREVENTION_FUNCTIONS_H
-#define FOREST_FIRE_PREVENTION_FUNCTIONS_H
+#ifndef FOREST_FIRE_PREVENTION_FIRESIM_H
+#define FOREST_FIRE_PREVENTION_FIRESIM_H
 #include <windows.h>
 #include <wind.h>
 
@@ -30,4 +30,5 @@ int calculate_risk_of_burning();
 
 
 
-#endif //FOREST_FIRE_PREVENTION_FUNCTIONS_H
+
+#endif //FOREST_FIRE_PREVENTION_FIRESIM_H
