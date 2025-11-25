@@ -117,6 +117,7 @@ void scan_settings(int* width, int* height, double* density) {
     do {
         printf("Please enter a width, height, and forest density (0.00 - 1):\n");
         scanf(" %d %d %lf", width, height, density);
+        fseek(stdin,0,SEEK_END); //might cause issue with user input, we'll see
     } while (!(*width <= MAX_WIDTH && *width > 0 && *height <= MAX_HEIGHT && *height > 0 && *density <= 1 && *density >= 0));
 }
 
