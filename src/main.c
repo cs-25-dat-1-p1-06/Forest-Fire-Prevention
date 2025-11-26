@@ -19,6 +19,10 @@ int main(void) {
     console_setup();
     tree_t* forest = malloc(width*height*sizeof(tree_t));
     make_rnd_forest(forest, density, width*height);
+    start_fire(forest,5,5,width);
+    CONSOLE_SCREEN_BUFFER_INFO start_buffer;
+    GetConsoleScreenBufferInfo(hConsole, &start_buffer);
+    COORD start_coord = start_buffer.dwCursorPosition;
     print_forest(forest, height, width);
 
     //Initiliasere vind
@@ -31,6 +35,9 @@ int main(void) {
     }
     start_wind(wind);
     status_text(wind, forest, width * height);
+    tick(forest,height,width, wind, start_coord.Y);
+
+
 
     free(forest);
     free(wind);
