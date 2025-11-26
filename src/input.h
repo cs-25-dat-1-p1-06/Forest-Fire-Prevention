@@ -17,12 +17,45 @@ typedef struct
     command_e command;
 } input_t;
 
-
+/**
+ * loop til brugerens input
+ * @param x pointer til x værdien af der hvor brugeren klikker
+ * @param y pointer til y værdien af der hvor brugeren klikker
+ * @param command pointer til den command som skal gives baseret på tastatur input
+ * @return NULL når den er færdig
+ */
 void* user_input_loop(int *x, int *y, int *command);
+
+/**
+ * tager brugerens input fra mus eller tastatur
+ * @param x pointer til x værdien af der hvor brugeren klikker
+ * @param y pointer til y værdien af der hvor brugeren klikker
+ * @param command pointer til den command som skal gives baseret på tastatur input
+ */
 void user_input(int *x, int *y, int *command);
+/**
+ * tjekker hvor brugeren klikker
+ * @param mer muse event
+ * @param x pointer til x værdien af der hvor brugeren klikker
+ * @param y pointer til y værdien af der hvor brugeren klikker
+ * @return 0 hvis brugeren ikke klikker (uønskede input). 1 hvis brugeren klikker et sted i konsollen
+ */
 int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y);
+
+/**
+ * tjekker hvilken tast der bliver trykket
+ * @param ker tastatur event
+ * @param command pointer til den command som skal gives baseret på tastatur input
+ * @return 0 hvis der ikke blev trykket på en tast (uønskede input). 1 hvis der blev trykket på en tast
+ */
 int KeyEventProc(KEY_EVENT_RECORD ker, int *command);
 
+/**
+ * tillader brugeren at indtaste størrelse og tæthed af skoven
+ * @param width pointer til den ønskede bredde af skoven
+ * @param height pointer til den ønskede højde af skoven
+ * @param density pointer til en sandsynlighedsværdi mellem 0 og 1 for om der er et træ i en celle
+ */
 void scan_settings(int* width, int* height, double* density);
 
 #endif //FOREST_FIRE_PREVENTION_INPUT_H
