@@ -14,16 +14,17 @@ void console_setup()
     //hides the cursor
     CONSOLE_CURSOR_INFO cursorInfo;
     GetConsoleCursorInfo(hConsole, &cursorInfo);
-    cursorInfo.bVisible = 0; // set the cursor visibility
+    cursorInfo.bVisible = 0; //gør markøren usynlig
     SetConsoleCursorInfo(hConsole, &cursorInfo);
 
     //maximizes window
-    HWND consoleWindow = GetConsoleWindow(); // This gets the value Windows uses to identify your output window
-    ShowWindow(consoleWindow, SW_MAXIMIZE); // this mimics clicking on its maximize button
-}
+    HWND consoleWindow = GetConsoleWindow(); //tager værdien som Windows bruger til at identificere output vinduet (konsollen)
+    ShowWindow(consoleWindow, SW_MAXIMIZE); //maksimerer output vinduet
 
+
+    SetConsoleOutputCP(CP_UTF8);
+
+}
 void reset_color() {
     color_change(0);
     color_change(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-
-}

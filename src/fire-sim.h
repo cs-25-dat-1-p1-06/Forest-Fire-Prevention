@@ -7,8 +7,7 @@
 typedef enum {empty, fresh, burning, burnt, wet} status_e;
 typedef struct {
     status_e status;
-    int humidity, fire_strength;
-    double fuel_left;
+    double humidity, fire_strength, fuel_left;
 } tree_t;
 
 /**

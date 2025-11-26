@@ -6,18 +6,18 @@
 #define MAX_WIDTH 500
 #define MAX_HEIGHT 100
 
-//global variable changeable by any .c file that includes this library.
+//global variabel som kan tilgås af andre .c filer, dette bruges når loopet skal stoppes af en anden .c fil
 int accept_user_input;
 
 
-//function will be run as another thread so user can make inputs while sim is running
+//funktionen skal køres som en anden thread som kan modtage brugerens input imens simulationen kører
 void* user_input_loop(int *x, int *y, int *command)
 {
     accept_user_input = 1;
-    //loop ends when code in main runs accept_user_input = 0
+    //loop sluttter når kode i main kører accept_user_input = 0
     while (accept_user_input)
     {
-        //code loop for user input
+        //kode loop til bruger input
         user_input(x, y, command);
     }
     return NULL;
@@ -33,17 +33,17 @@ void user_input(int *x, int *y, int *command)
     DWORD cNumRead, fdwMode, i;
     INPUT_RECORD irInBuf[128];
 
-    // Get the standard input handle.
+    //får standard input handle
     hStdin = GetStdHandle(STD_INPUT_HANDLE);
     if (hStdin == INVALID_HANDLE_VALUE)
         exit(EXIT_FAILURE);
 
-    // Save the current input mode, to be restored on exit.
+    //gemmer den nuværende input mode så den kan gendannes inden slut
     if (! GetConsoleMode(hStdin, &fdwSaveOldMode) )
         exit(EXIT_FAILURE);
 
-    // Enable the window and mouse input events.
-    // Disable quick edit mode because it interfers with receiving mouse inputs.
+    //aktiverer vindue og muse input events
+    //deaktiverer quick edit mode da dette skaber problemer med at modtage muse inputs.
     fdwMode = (ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE;
     if (! SetConsoleMode(hStdin, fdwMode) )
         exit(EXIT_FAILURE);
@@ -51,7 +51,7 @@ void user_input(int *x, int *y, int *command)
     int no_input = 1;
     while (no_input)
     {
-        // Wait for the events.
+        //venter på en event
         if (! ReadConsoleInput(
                 hStdin,      // input buffer handle
                 irInBuf,     // buffer to read into
@@ -59,7 +59,7 @@ void user_input(int *x, int *y, int *command)
                 &cNumRead) ) // number of records read
                     exit(EXIT_FAILURE);
 
-        // Dispatch the events to the appropriate handler.
+        //deler events ud til en passende funktion
         for (i = 0; i < cNumRead; i++)
         {
             switch(irInBuf[i].EventType)
@@ -78,16 +78,16 @@ void user_input(int *x, int *y, int *command)
                 break;
             }
         }
-    } //loop will run indefinetly until user gives a valid input
+    } //looper uendeligt indtil brugeren laver et gyldigt input
 
-    // Restore input mode on exit.
+    //gendanner input mode inden slut
     SetConsoleMode(hStdin, fdwSaveOldMode);
 }
 
-//code to be run when user clicks
+//kode der skal køres når brugeren klikker et sted i konsollen
 int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y)
 {
-    if (mer.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    if (mer.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED) //hvis brugeren trykker på venstre muse knap
     {
         *x = mer.dwMousePosition.X / 2;
         *y = mer.dwMousePosition.Y;
@@ -96,16 +96,16 @@ int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y)
     return 0;
 }
 
-//code to be run when user presses a key
-//the virtual code of the keys can be found here
+//kode der skal køres når brugeren trykker på en tast
+//de virtuelle koder til tasterne kan findes her:
 //https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 int KeyEventProc(KEY_EVENT_RECORD ker, int *command)
 {
-    if (ker.bKeyDown) //if key is pressed
+    if (ker.bKeyDown) //hvis en tast bliver trykket
     {
-        if (ker.wVirtualKeyCode == 0x41) //if key is 'A'
+        if (ker.wVirtualKeyCode == 0x41) //hvis tasten er 'A'
         {
-            //code to be run when the key 'A' is pressed
+            //kode der skal køres når 'A' bliver trykket
 
         }
         return 1;
@@ -117,6 +117,7 @@ void scan_settings(int* width, int* height, double* density) {
     do {
         printf("Please enter a width, height, and forest density (0.00 - 1):\n");
         scanf(" %d %d %lf", width, height, density);
+        fseek(stdin,0,SEEK_END); //tømmer input bufferen
     } while (!(*width <= MAX_WIDTH && *width > 0 && *height <= MAX_HEIGHT && *height > 0 && *density <= 1 && *density >= 0));
 }
 
