@@ -11,21 +11,23 @@ int accept_user_input;
 
 
 //funktionen skal køres som en anden thread som kan modtage brugerens input imens simulationen kører
-void* user_input_loop(int *x, int *y, int *command)
+void* user_input_loop(void* args)
 {
+    input_t* input = args;
+
     accept_user_input = 1;
     //loop sluttter når kode i main kører accept_user_input = 0
     while (accept_user_input)
     {
         //kode loop til bruger input
-        user_input(x, y, command);
+        user_input(&input->x, &input->y, &input->command);
     }
     return NULL;
 }
 
 //modificeret version af kode fra
 //https://learn.microsoft.com/en-us/windows/console/reading-input-buffer-events
-void user_input(int *x, int *y, int *command)
+void user_input(int *x, int *y, command_e *command)
 {
     DWORD fdwSaveOldMode;
     HANDLE hStdin;
@@ -99,14 +101,18 @@ int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y)
 //kode der skal køres når brugeren trykker på en tast
 //de virtuelle koder til tasterne kan findes her:
 //https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-int KeyEventProc(KEY_EVENT_RECORD ker, int *command)
+int KeyEventProc(KEY_EVENT_RECORD ker, command_e *command)
 {
     if (ker.bKeyDown) //hvis en tast bliver trykket
     {
-        if (ker.wVirtualKeyCode == 0x41) //hvis tasten er 'A'
+        switch (ker.wVirtualKeyCode)
         {
+        case 0x20:
+            *command = pause;
+            break;
+        case 0x41: //hvis tasten er 'A'
             //kode der skal køres når 'A' bliver trykket
-
+            break;
         }
         return 1;
     }

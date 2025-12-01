@@ -10,6 +10,7 @@ typedef struct {
     double humidity, fire_strength, fuel_left;
 } tree_t;
 
+
 /**
  * Funktion der laver en tilfældig skov, af 'fresh' eller 'empty' træer.
  * Og ændrer deres indhold til at passe dertil
@@ -24,8 +25,9 @@ void make_rnd_forest(tree_t* forest, double density, int size);
  * @param forest Træernes array: Skoven.
  * @param height Hvor mange træer høj skoven er
  * @param width Hvor mange træer bred skoven er
+ * @param start_y hvor langt ned i konsollen skoven skal udskrives
  */
-void print_forest(tree_t* forest, int height, int width);
+void print_forest(tree_t* forest, int height, int width, int start_y);
 
 /**
  * Funktion der får en tree pointer ud fra koordinater, for at hente info eller ændre i den.
@@ -103,15 +105,25 @@ void user_drop_water(tree_t* forest, int x, int y, int width);
 void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zone);
 
 /**
- * Funktion der kører simulationen. Den gør alt der sker inden for et tick i computeren.
- * Og gentager dette skridt indtil simulationen er færdig. Parametre anvendes i de indre funktioner.
+ * Alt det som skal ske inden for et tick i simulationen
  * @param forest Skoven
  * @param height Skovens højde
  * @param width Skovens bredde
  * @param wind Vindens styrke og retning
- * @param start_y Hvor konsollens cursor er, når denne funktion starter
+ * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
  */
 void tick(tree_t* forest, int height, int width, wind_t* wind, int start_y);
+
+/**
+ * Funktion der kører simulationen. Gentager tick funktionen indtil simulationen er færdig med et delay på 0,1 sekunder mellem hvert tick
+ * @param forest Skoven
+ * @param height Skovens højde
+ * @param width Skovens bredde
+ * @param wind Vindens styrke og retning
+ * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
+ */
+void fire_sim(tree_t* forest, int height, int width, wind_t* wind, int start_y);
+
 
 /**
  * Checker hvilke træer der brænder, og sænker fuel_left med en fast værdi.
