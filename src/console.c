@@ -28,3 +28,4 @@ void console_setup()
 void reset_color() {
     color_change(0);
     color_change(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+}
