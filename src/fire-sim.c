@@ -5,6 +5,9 @@
 #include <windows.h>
 #include <math.h>
 #include <unistd.h>
+#include <pthread.h>
+
+#include "input.h"
 
 #define BLUE BACKGROUND_BLUE
 #define GREEN BACKGROUND_GREEN
@@ -17,6 +20,8 @@
 #define RATE_OF_BURN 0.2
 #define STARTING_FIRE_STRENGTH 40
 #define SPREAD_FIRE_STRENGTH 15
+
+
 void make_rnd_forest(tree_t* forest, double density, int size) {
     for (int i = 0; i < size; i++) {
         if (rand() % 100 < density * 100){
@@ -33,7 +38,11 @@ void make_rnd_forest(tree_t* forest, double density, int size) {
         }
     }
 }
-void print_forest(tree_t* forest, int height, int width) {
+void print_forest(tree_t* forest, int height, int width, int start_y) {
+    /* Vi sætter cursoren i konsollen til at være dér hvor skoven starter,
+         * hvorefter vi printer skoven og statusteksten ovenpå.*/
+    SetConsoleCursorPosition(hConsole, (COORD){0,start_y});
+
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
             switch (get_tree(i,j,width,forest)->status) {
@@ -185,9 +194,9 @@ int sim_finished_check(tree_t* forest, int size)
 {
     int counter = get_trees_amount(forest, size, burning);
     if (counter > 0) {
-        return 1;
+        return 0;
     }
-    return 0;
+    return 1;
 }
 void spread(tree_t* forest, int height, int width, int* trees_to_burn) {
     for (int i = 0; i < width*height; i++) {
@@ -235,32 +244,50 @@ int* scan_forest_spread(tree_t* forest, int height, int width) {
     return trees_to_burn;
 }
 //Laver en tick funktion der håndterer alt der skal ske når et tick foregår.
-void tick(tree_t* forest, int height, int width, wind_t* wind, int start_y) {
-    //Initialiserer variable for at se om simulationen er færdig.
-    int check;
+void tick(tree_t* forest, int height, int width, wind_t* wind, int start_y)
+{
+    //Vi vil have at brændende træer mister brændstof, og at ilden spreder sig.
+    burndown(forest, height, width);
+    //Vi scanner for hvilke træer der skal brænde
+    int* trees_to_burn = scan_forest_spread(forest, height, width);
+    //Hvis dette array ikke er en NULL pointer, fortsætter vi
+    if (trees_to_burn != NULL) {
+        spread(forest, height, width, trees_to_burn);
+    }
+}
+
+void fire_sim(tree_t* forest, int height, int width, wind_t* wind, int start_y) {
+    pthread_t input_thread;
+    input_t user_input = {0, 0, 0};
+
+    pthread_create(&input_thread, NULL, user_input_loop, &user_input);
+
+    int paused = 0;
     do {
-        //Vi vil have at brændende træer mister brændstof, og at ilden spreder sig.
-        burndown(forest, height, width);
-        //Vi scanner for hvilke træer der skal brænde
-        int* trees_to_burn = scan_forest_spread(forest, height, width);
-        //Hvis dette array ikke er en NULL pointer, fortsætter vi
-        if (trees_to_burn != NULL) {
-            spread(forest, height, width, trees_to_burn);
+        switch (user_input.command)
+        {
+        case pause:
+            paused = !paused; //omvender paused så 0 bliver til 1 og 1 bliver til 0
+            break;
         }
-        /*Vi sætter cursoren i konsollen til at være dér hvor skoven starter,
-         *hvorefter vi printer skoven og statusteksten ovenpå.
-         */
-        SetConsoleCursorPosition(hConsole, (COORD){0,start_y});
-        print_forest(forest,height,width);
+        user_input.command = none;
+
+
+        if (paused)
+        {
+            tick(forest, height, width, wind, start_y);
+        }
+
+        print_forest(forest, height, width, start_y);
+
         status_text(wind, forest, width * height);
 
-        //Vi checker om simulationen er færdig
-        check = sim_finished_check(forest, height*width);
         //Vi beder computeren om at vente 0.1 sekunder (10^5 mikrosekunder) mellem hver iteration
         usleep(pow(10,5));
 
-        //Check om løkken er færdig
-    } while (check == 1);
+        //Vi checker om simulationen er færdig
+    } while (!sim_finished_check(forest, height * width));
+    accept_user_input = 0;
     printf("Sim is finished!\n");
 }
 

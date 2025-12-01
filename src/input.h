@@ -7,7 +7,7 @@ extern int accept_user_input;
 
 
 //every possible user command
-typedef enum {water} command_e;
+typedef enum {none, pause} command_e;
 
 //example struct in case it is useable
 typedef struct
@@ -24,7 +24,7 @@ typedef struct
  * @param command pointer til den command som skal gives baseret på tastatur input
  * @return NULL når den er færdig
  */
-void* user_input_loop(int *x, int *y, int *command);
+void* user_input_loop(void* args);
 
 /**
  * tager brugerens input fra mus eller tastatur
@@ -32,7 +32,7 @@ void* user_input_loop(int *x, int *y, int *command);
  * @param y pointer til y værdien af der hvor brugeren klikker
  * @param command pointer til den command som skal gives baseret på tastatur input
  */
-void user_input(int *x, int *y, int *command);
+void user_input(int *x, int *y, command_e *command);
 /**
  * tjekker hvor brugeren klikker
  * @param mer muse event
@@ -48,7 +48,7 @@ int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y);
  * @param command pointer til den command som skal gives baseret på tastatur input
  * @return 0 hvis der ikke blev trykket på en tast (uønskede input). 1 hvis der blev trykket på en tast
  */
-int KeyEventProc(KEY_EVENT_RECORD ker, int *command);
+int KeyEventProc(KEY_EVENT_RECORD ker, command_e *command);
 
 /**
  * tillader brugeren at indtaste størrelse og tæthed af skoven

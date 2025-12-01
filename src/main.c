@@ -23,7 +23,6 @@ int main(void) {
     CONSOLE_SCREEN_BUFFER_INFO start_buffer;
     GetConsoleScreenBufferInfo(hConsole, &start_buffer);
     COORD start_coord = start_buffer.dwCursorPosition;
-    print_forest(forest, height, width);
 
     //Initiliasere vind
     wind_t *wind = (wind_t*) malloc(sizeof(wind_t));
@@ -34,8 +33,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
     start_wind(wind);
-    status_text(wind, forest, width * height);
-    tick(forest,height,width, wind, start_coord.Y);
+    fire_sim(forest, height, width, wind, start_coord.Y);
 
 
 

@@ -25,6 +25,8 @@ void console_setup()
     SetConsoleOutputCP(CP_UTF8);
 
 }
-void reset_color() {
+void reset_color()
+{
     color_change(0);
     color_change(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+}
