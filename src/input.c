@@ -21,8 +21,18 @@ void* user_input_loop(void* args)
     {
         //kode loop til bruger input
         user_input(&input->x, &input->y, &input->command);
+        switch (input->command)
+        {
+        case pause:
+            input->paused = !input->paused; //omvender paused så 0 bliver til 1 og 1 bliver til 0
+            input->command = none;
+            break;
+        case forest_thinning:
+            destroy_tree(input->forest, input->height, input->width, input->x, input->y, input->start_y);
+        }
+        input->x = MAX_WIDTH + 1;
+        input->y = MAX_HEIGHT + 1;
     }
-    return NULL;
 }
 
 //modificeret version af kode fra
@@ -105,15 +115,7 @@ int KeyEventProc(KEY_EVENT_RECORD ker, command_e *command)
 {
     if (ker.bKeyDown) //hvis en tast bliver trykket
     {
-        switch (ker.wVirtualKeyCode)
-        {
-        case 0x20:
-            *command = pause;
-            break;
-        case 0x41: //hvis tasten er 'A'
-            //kode der skal køres når 'A' bliver trykket
-            break;
-        }
+        *command = ker.wVirtualKeyCode;
         return 1;
     }
     return 0;

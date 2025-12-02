@@ -219,10 +219,13 @@ int* scan_forest_spread(tree_t* forest, int height, int width) {
     //For hvert træ i skoven:
     for (int i = 0; i < height; i++ ) {
         for (int j = 0; j < width; j++) {
-            //Hvis et træ brænder, er brændt eller er tom, skal det selvfølgelig ikke brændes. Derfor
-            if (get_tree(j, i, width, forest)->status == burning ||
-                get_tree(j, i, width, forest)->status == empty ||
-                get_tree(j, i, width, forest)->status == burnt) {
+            tree_t* current_tree = get_tree(j, i, width, forest);
+            //Hvis et træ brænder, er brændt eller er tom, skal det selvfølgelig ikke brændes.
+            switch (current_tree->status)
+            {
+            case burning:
+            case empty:
+            case burnt:
                 trees_to_burn[counter] = -1;
                 counter++;
                 continue;
@@ -258,22 +261,12 @@ void tick(tree_t* forest, int height, int width, wind_t* wind, int start_y)
 
 void fire_sim(tree_t* forest, int height, int width, wind_t* wind, int start_y) {
     pthread_t input_thread;
-    input_t user_input = {0, 0, 0};
+    input_t user_input = {0, 0, 0, 1, forest, width, height, start_y};
 
     pthread_create(&input_thread, NULL, user_input_loop, &user_input);
 
-    int paused = 0;
     do {
-        switch (user_input.command)
-        {
-        case pause:
-            paused = !paused; //omvender paused så 0 bliver til 1 og 1 bliver til 0
-            break;
-        }
-        user_input.command = none;
-
-
-        if (paused)
+        if (!user_input.paused)
         {
             tick(forest, height, width, wind, start_y);
         }
@@ -289,6 +282,15 @@ void fire_sim(tree_t* forest, int height, int width, wind_t* wind, int start_y) 
     } while (!sim_finished_check(forest, height * width));
     accept_user_input = 0;
     printf("Sim is finished!\n");
+}
+
+void destroy_tree(tree_t* forest, int height, int width, int x, int y, int start_y)
+{
+    tree_t* tree_to_destroy = get_tree(x, y - start_y, width, forest);
+    if (x < width && y - start_y < height && tree_to_destroy->status != burning &&tree_to_destroy->status != burnt)
+    {
+        tree_to_destroy->status = empty;
+    }
 }
 
 
