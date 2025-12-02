@@ -3,10 +3,6 @@
 #include "windows.h"
 #include "fire-sim.h"
 
-//gør dette variabel synlig for de filer der inkluderer denne header, så der kan tændes og slukkes for brugerens input
-extern int accept_user_input;
-
-
 //every possible user command
 typedef enum {none = 0x00, pause = 0x20, forest_thinning = 0x46} command_e;
 
@@ -17,10 +13,9 @@ typedef struct
     int y;
     command_e command;
     int paused;
-    tree_t* forest;
-    int width;
-    int height;
+    forest_t forest;
     int start_y;
+    int accept_user_input;
 } input_t;
 
 /**

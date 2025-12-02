@@ -6,8 +6,6 @@
 #define MAX_WIDTH 500
 #define MAX_HEIGHT 100
 
-//global variabel som kan tilgås af andre .c filer, dette bruges når loopet skal stoppes af en anden .c fil
-int accept_user_input;
 
 
 //funktionen skal køres som en anden thread som kan modtage brugerens input imens simulationen kører
@@ -15,9 +13,9 @@ void* user_input_loop(void* args)
 {
     input_t* input = args;
 
-    accept_user_input = 1;
+    input->accept_user_input = 1;
     //loop sluttter når kode i main kører accept_user_input = 0
-    while (accept_user_input)
+    while (input->accept_user_input)
     {
         //kode loop til bruger input
         user_input(&input->x, &input->y, &input->command);
@@ -28,11 +26,12 @@ void* user_input_loop(void* args)
             input->command = none;
             break;
         case forest_thinning:
-            destroy_tree(input->forest, input->height, input->width, input->x, input->y, input->start_y);
+            destroy_tree(input->forest, input->x, input->y, input->start_y);
         }
-        input->x = MAX_WIDTH + 1;
-        input->y = MAX_HEIGHT + 1;
+        input->y = -1;
     }
+
+    return NULL;
 }
 
 //modificeret version af kode fra

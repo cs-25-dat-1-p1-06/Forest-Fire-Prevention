@@ -10,6 +10,12 @@ typedef struct {
     double humidity, fire_strength, fuel_left;
 } tree_t;
 
+typedef struct
+{
+    tree_t* trees;
+    int width, height, size;
+    wind_t wind;
+} forest_t;
 
 /**
  * Funktion der laver en tilfældig skov, af 'fresh' eller 'empty' træer.
@@ -18,7 +24,7 @@ typedef struct {
  * @param density Sandsynligheden for om et givet træ er 'fresh' eller 'empty'
  * @param size Størrelsen af skoven
  */
-void make_rnd_forest(tree_t* forest, double density, int size);
+forest_t make_rnd_forest(double density, int width, int height, wind_t wind);
 
 /**
  * Funktion der printer skoven som farver i konsollen baseret på hvert træs status
@@ -27,7 +33,7 @@ void make_rnd_forest(tree_t* forest, double density, int size);
  * @param width Hvor mange træer bred skoven er
  * @param start_y hvor langt ned i konsollen skoven skal udskrives
  */
-void print_forest(tree_t* forest, int height, int width, int start_y);
+void print_forest(forest_t forest, int start_y);
 
 /**
  * Funktion der får en tree pointer ud fra koordinater, for at hente info eller ændre i den.
@@ -37,7 +43,7 @@ void print_forest(tree_t* forest, int height, int width, int start_y);
  * @param forest Skoven træet hentes fra
  * @return Pointer til træet
  */
-tree_t* get_tree(int x, int y, int width, tree_t* forest);
+tree_t* get_tree(forest_t forest, int x, int y);
 
 /**
  * Funktion der tæller antal træer med en given status
@@ -46,7 +52,7 @@ tree_t* get_tree(int x, int y, int width, tree_t* forest);
  * @param target Status man leder efter
  * @return Antal træer med status.
  */
-int get_trees_amount(tree_t* forest, int size, status_e target);
+int get_trees_amount(forest_t forest, status_e target);
 
 /**
  * Funktion der skriver hvor mange træer er friske og brændte, samt vindens styrke og retning.
@@ -54,7 +60,7 @@ int get_trees_amount(tree_t* forest, int size, status_e target);
  * @param forest Træernes array: Skoven
  * @param size Størrelsen på skoven
  */
-void status_text(wind_t* wind, tree_t* forest, int size);
+void status_text(forest_t forest);
 
 /**
  * Funktion der checker om der stadig er ild i skoven.
@@ -62,8 +68,7 @@ void status_text(wind_t* wind, tree_t* forest, int size);
  * @param size Skovens størrelse
  * @return Hvis noget brænder 1 ellers 0
  */
-int sim_finished_check(tree_t* forest, int size);
-
+int sim_finished_check(forest_t forest);
 /**
  * Ændrer et givet træ til at brænde med en fast styrke. Sådan starter vi simulationen
  * @param forest Skoven
@@ -71,7 +76,7 @@ int sim_finished_check(tree_t* forest, int size);
  * @param y 2. koordinat til træet som skal brænde
  * @param width Skovens bredde i træer
  */
-void start_fire(tree_t* forest, int x, int y, int width);
+void start_fire(forest_t forest, int x, int y);
 
 /**
  * gennemgår de træer omkring et givet træ og ser hvor meget fire strength der er i dem og returnerer den samlede fire strength
@@ -82,7 +87,7 @@ void start_fire(tree_t* forest, int x, int y, int width);
  * @param height højden på skoven
  * @return
  */
-int check_surrounding_fire_strength(tree_t* forest, int x, int y,int width, int height, wind_t wind);
+int check_surrounding_fire_strength(forest_t forest, int x, int y);
 
 /**
  * Givet et træ, ændres den og de rundtomstående træer til at være våde.
@@ -91,7 +96,7 @@ int check_surrounding_fire_strength(tree_t* forest, int x, int y,int width, int 
  * @param y 2. koordinat
  * @param width Skovens bredde
  */
-void user_drop_water(tree_t* forest, int x, int y, int width);
+void user_drop_water(forest_t forest, int x, int y);
 
 /**
  * Funktion der laver en firkant rundt om et givet træ af træer med status "empty",
@@ -102,7 +107,7 @@ void user_drop_water(tree_t* forest, int x, int y, int width);
  * @param width Skovens bredde i træer
  * @param size_of_dead_zone Antal træer fra midten i hver retning ("Radius" på firkanten).
  */
-void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zone);
+void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_zone);
 
 /**
  * Alt det som skal ske inden for et tick i simulationen
@@ -112,8 +117,7 @@ void user_dead_zone(tree_t* forest, int x, int y, int width, int size_of_dead_zo
  * @param wind Vindens styrke og retning
  * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
  */
-void tick(tree_t* forest, int height, int width, wind_t* wind, int start_y);
-
+void tick(forest_t forest);
 /**
  * Funktion der kører simulationen. Gentager tick funktionen indtil simulationen er færdig med et delay på 0,1 sekunder mellem hvert tick
  * @param forest Skoven
@@ -122,7 +126,7 @@ void tick(tree_t* forest, int height, int width, wind_t* wind, int start_y);
  * @param wind Vindens styrke og retning
  * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
  */
-void fire_sim(tree_t* forest, int height, int width, wind_t* wind, int start_y);
+void fire_sim(forest_t forest, int start_y);
 
 
 /**
@@ -132,7 +136,7 @@ void fire_sim(tree_t* forest, int height, int width, wind_t* wind, int start_y);
  * @param height Skovens højde
  * @param width Skovens bredde
  */
-void burndown(tree_t* forest, int height, int width);
+void burndown(forest_t forest);
 
 /**
  * Funktion der givet skovens tilstand og et træ, tjekker hvor vidt træet vil brænde.
@@ -143,7 +147,7 @@ void burndown(tree_t* forest, int height, int width);
  * @param height Skovens højde
  * @return Chance: En double der siger træets risiko for at brænde i procenter fra 1 til 100.
  */
-double calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int height, wind_t wind);
+double calculate_risk_of_burning(forest_t forest, int x, int y);
 
 /**
  * Funktion der for hvert træ i skoven tjekker om det skal brændes vha. trees_to_burn.
@@ -154,7 +158,7 @@ double calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int hei
  * @param width Skovens bredde
  * @param trees_to_burn Et array af alle træer som skal sættes ændres til at brænde
  */
-void spread(tree_t* forest, int height, int width, int* trees_to_burn);
+void spread(forest_t forest, int* trees_to_burn);
 
 /**
  * Funktion der givet en skov checker vha. andre funktioner hvilke træer,
@@ -166,6 +170,6 @@ void spread(tree_t* forest, int height, int width, int* trees_to_burn);
  */
 
 
-int* scan_forest_spread(tree_t* forest, int height, int width, wind_t wind);
-void destroy_tree(tree_t* forest, int height, int width, int x, int y, int start_y);
+int* scan_forest_spread(forest_t forest);
+void destroy_tree(forest_t forest, int x, int y, int start_y);
 #endif //FOREST_FIRE_PREVENTION_FIRESIM_H
