@@ -164,6 +164,8 @@ void spread(tree_t* forest, int height, int width, int* trees_to_burn);
  * @param width Skovens bredde
  * @return Array af integers som er værdier til et træs plads i arrayet (skoven)
  */
-int* scan_forest_spread(tree_t* forest, int height, int width, wind_t wind);
 
+
+int* scan_forest_spread(tree_t* forest, int height, int width, wind_t wind);
+void destroy_tree(tree_t* forest, int height, int width, int x, int y, int start_y);
 #endif //FOREST_FIRE_PREVENTION_FIRESIM_H

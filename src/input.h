@@ -1,13 +1,14 @@
 #ifndef FOREST_FIRE_PREVENTION_INPUT_H
 #define FOREST_FIRE_PREVENTION_INPUT_H
 #include "windows.h"
+#include "fire-sim.h"
 
 //gør dette variabel synlig for de filer der inkluderer denne header, så der kan tændes og slukkes for brugerens input
 extern int accept_user_input;
 
 
 //every possible user command
-typedef enum {none, pause} command_e;
+typedef enum {none = 0x00, pause = 0x20, forest_thinning = 0x46} command_e;
 
 //example struct in case it is useable
 typedef struct
@@ -15,6 +16,11 @@ typedef struct
     int x;
     int y;
     command_e command;
+    int paused;
+    tree_t* forest;
+    int width;
+    int height;
+    int start_y;
 } input_t;
 
 /**
