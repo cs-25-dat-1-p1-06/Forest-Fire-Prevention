@@ -17,12 +17,6 @@ int main(void) {
     scan_settings(&width, &height, &density);
 
     console_setup();
-    tree_t* forest = malloc(width*height*sizeof(tree_t));
-    make_rnd_forest(forest, density, width*height);
-    start_fire(forest,5,5,width);
-    CONSOLE_SCREEN_BUFFER_INFO start_buffer;
-    GetConsoleScreenBufferInfo(hConsole, &start_buffer);
-    COORD start_coord = start_buffer.dwCursorPosition;
 
     //Initiliasere vind
     wind_t *wind = (wind_t*) malloc(sizeof(wind_t));
@@ -33,11 +27,20 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
     start_wind(wind);
-    fire_sim(forest, height, width, wind, start_coord.Y);
+    forest_t forest = make_rnd_forest(density, width, height, *wind);
+
+
+    start_fire(forest,5,5);
+    CONSOLE_SCREEN_BUFFER_INFO start_buffer;
+    GetConsoleScreenBufferInfo(hConsole, &start_buffer);
+    COORD start_coord = start_buffer.dwCursorPosition;
+
+
+    fire_sim(forest, start_coord.Y);
 
 
 
-    free(forest);
+    free(forest.trees);
     free(wind);
 
     system("pause");
