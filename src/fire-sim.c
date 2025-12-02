@@ -18,7 +18,8 @@
 #define TREE_REP "  "
 
 #define RATE_OF_BURN 0.2
-#define STARTING_FIRE_STRENGTH 60
+#define STARTING_FIRE_STRENGTH 70
+#define STARTING_TREE_FUEL 1.4
 #define SPREAD_FIRE_STRENGTH 10
 
 
@@ -80,62 +81,75 @@ void start_fire(tree_t* forest, int x, int y, int width) {
     tree_t *tree = get_tree(x, y, width, forest);
     tree->status = burning;
     tree->fire_strength = STARTING_FIRE_STRENGTH;
+    tree->fuel_left = STARTING_TREE_FUEL;
     //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig?!"
 }
 
 int check_surrounding_fire_strength(tree_t* forest, int x, int y,int width, int height, wind_t wind) {
     double total_fire_strength = 0;
-    double wind_factor = wind.speed;
+    double wind_factor = wind.speed * 0.50;
 
-    for (int i = -1; i <= 1; i++) {
+    for (int i = -2; i <= 2; i++) {
         if (0 <= y + i && y + i < height) { //hvis y-værdien er indenfor arrayets y-akse
-            for (int j = -1; j <= 1; j++) {
+            for (int j = -2; j <= 2; j++) {
                 if (0 <= x + j && x + j < width) { //hvis x-værdien er indenfor arrayets x-akse
                     tree_t* tree = get_tree(x + j, y + i, width, forest);
+                    //Vi fjerner de fjerne hjørner via. continue
+                    if ((i == -2 && j == -2)||(i == -2 && j == 2)||(i == 2 && j == -2)||(i == 2 && j == 2)) {
+                        continue;
+                    }
                     if (tree->status == burning) {
+                        //Vi bestemmer fire_strength ift. afstanden. Svagere jo længere væk træet er.
+                        double current_fire_strength;
+                        if (i == 2 || i == -2 || j == 2 || j == -2) {
+                            current_fire_strength = tree->fire_strength / 4;
+                        } else {
+                            current_fire_strength = tree->fire_strength / 2;
+                        }
+
                         switch (wind.direction) { // Vi tager højde for vind. Ved at tilføje en faktor ift. retning
                             case NORTH:
                                 if (i > 0) {
-                                    total_fire_strength += tree->fire_strength + wind_factor;
+                                    total_fire_strength += current_fire_strength + wind_factor;
                                 }
                                 else if (i < 0) {
-                                    total_fire_strength += tree->fire_strength - wind_factor;
+                                    total_fire_strength += current_fire_strength - wind_factor;
                                 }
                                 else {
-                                    total_fire_strength += tree->fire_strength;
+                                    total_fire_strength += current_fire_strength;
                                 }
                                 break;
                             case EAST:
                                 if (j < 0) {
-                                    total_fire_strength += tree->fire_strength + wind_factor;
+                                    total_fire_strength += current_fire_strength + wind_factor;
                                 }
                                 else if (j > 0) {
-                                    total_fire_strength += tree->fire_strength - wind_factor;
+                                    total_fire_strength += current_fire_strength - wind_factor;
                                 }
                                 else {
-                                    total_fire_strength += tree->fire_strength;
+                                    total_fire_strength += current_fire_strength;
                                 }
                                 break;
                             case SOUTH:
                                 if (i < 0) {
-                                    total_fire_strength += tree->fire_strength + wind_factor;
+                                    total_fire_strength += current_fire_strength + wind_factor;
                                 }
                                 else if (i > 0) {
-                                    total_fire_strength += tree->fire_strength - wind_factor;
+                                    total_fire_strength += current_fire_strength - wind_factor;
                                 }
                                 else {
-                                    total_fire_strength += tree->fire_strength;
+                                    total_fire_strength += current_fire_strength;
                                 }
                                 break;
                             case WEST:
                                 if (j > 0) {
-                                    total_fire_strength += tree->fire_strength + wind_factor;
+                                    total_fire_strength += current_fire_strength + wind_factor;
                                 }
                                 else if (j < 0) {
-                                    total_fire_strength += tree->fire_strength - wind_factor;
+                                    total_fire_strength += current_fire_strength - wind_factor;
                                 }
                                 else {
-                                    total_fire_strength += tree->fire_strength;
+                                    total_fire_strength += current_fire_strength;
                                 }
                                 break;
                         }
