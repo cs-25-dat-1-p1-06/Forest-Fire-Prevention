@@ -21,6 +21,7 @@
 #define STARTING_FIRE_STRENGTH 70
 #define STARTING_TREE_FUEL 1.4
 #define SPREAD_FIRE_STRENGTH 10
+#define SPREAD_RANGE 2
 
 
 void make_rnd_forest(tree_t* forest, double density, int size) {
@@ -89,23 +90,23 @@ int check_surrounding_fire_strength(tree_t* forest, int x, int y,int width, int 
     double total_fire_strength = 0;
     double wind_factor = wind.speed * 0.50;
 
-    for (int i = -2; i <= 2; i++) {
+    for (int i = -SPREAD_RANGE; i <= SPREAD_RANGE; i++) {
         if (0 <= y + i && y + i < height) { //hvis y-værdien er indenfor arrayets y-akse
-            for (int j = -2; j <= 2; j++) {
+            for (int j = -SPREAD_RANGE; j <= SPREAD_RANGE; j++) {
                 if (0 <= x + j && x + j < width) { //hvis x-værdien er indenfor arrayets x-akse
                     tree_t* tree = get_tree(x + j, y + i, width, forest);
                     //Vi fjerner de fjerne hjørner via. continue
-                    if ((i == -2 && j == -2)||(i == -2 && j == 2)||(i == 2 && j == -2)||(i == 2 && j == 2)) {
+                    if ((i == SPREAD_RANGE && j == SPREAD_RANGE)||
+                        (i == SPREAD_RANGE && j == -SPREAD_RANGE)||
+                        (i == -SPREAD_RANGE && j == SPREAD_RANGE)||
+                        (i == -SPREAD_RANGE && j == -SPREAD_RANGE)) {
                         continue;
                     }
                     if (tree->status == burning) {
                         //Vi bestemmer fire_strength ift. afstanden. Svagere jo længere væk træet er.
-                        double current_fire_strength;
-                        if (i == 2 || i == -2 || j == 2 || j == -2) {
-                            current_fire_strength = tree->fire_strength / 4;
-                        } else {
-                            current_fire_strength = tree->fire_strength / 2;
-                        }
+                        double distance = sqrt(pow(i,2) + pow(j,2));
+                        double current_fire_strength = tree->fire_strength / pow(2,floor(distance));
+
 
                         switch (wind.direction) { // Vi tager højde for vind. Ved at tilføje en faktor ift. retning
                             case NORTH:
