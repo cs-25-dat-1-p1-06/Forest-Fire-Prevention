@@ -82,7 +82,7 @@ void start_fire(tree_t* forest, int x, int y, int width);
  * @param height højden på skoven
  * @return
  */
-int check_surrounding_fire_strength(tree_t* forest, int x, int y,int width, int height);
+int check_surrounding_fire_strength(tree_t* forest, int x, int y,int width, int height, wind_t wind);
 
 /**
  * Givet et træ, ændres den og de rundtomstående træer til at være våde.
@@ -143,7 +143,7 @@ void burndown(tree_t* forest, int height, int width);
  * @param height Skovens højde
  * @return Chance: En double der siger træets risiko for at brænde i procenter fra 1 til 100.
  */
-double calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int height);
+double calculate_risk_of_burning(tree_t* forest, int x, int y,int width, int height, wind_t wind);
 
 /**
  * Funktion der for hvert træ i skoven tjekker om det skal brændes vha. trees_to_burn.
@@ -164,8 +164,8 @@ void spread(tree_t* forest, int height, int width, int* trees_to_burn);
  * @param width Skovens bredde
  * @return Array af integers som er værdier til et træs plads i arrayet (skoven)
  */
-int* scan_forest_spread(tree_t* forest, int height, int width);
+
+
+int* scan_forest_spread(tree_t* forest, int height, int width, wind_t wind);
 void destroy_tree(tree_t* forest, int height, int width, int x, int y, int start_y);
-
-
 #endif //FOREST_FIRE_PREVENTION_FIRESIM_H
