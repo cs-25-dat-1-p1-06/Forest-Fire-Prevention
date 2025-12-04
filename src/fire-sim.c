@@ -17,10 +17,10 @@
 #define BLACK 0
 #define TREE_REP "  "
 
-#define RATE_OF_BURN 0.2
-#define STARTING_FIRE_STRENGTH 70
+#define RATE_OF_BURN 0.4
+#define STARTING_FIRE_STRENGTH 30
 #define STARTING_TREE_FUEL 1.4
-#define SPREAD_FIRE_STRENGTH 10
+#define SPREAD_FIRE_STRENGTH 15
 #define SPREAD_RANGE 2
 
 
@@ -89,14 +89,15 @@ void start_fire(forest_t forest, int x, int y) {
     //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig?!"
 }
 
-int check_surrounding_fire_strength(forest_t forest, int x, int y) {
-    double total_fire_strength = 0;
-    double wind_factor = forest.wind.speed * 0.50;
+double calculate_fire_prob(forest_t forest, int x, int y) {
+    double not_fire_prob = 1;
+    double wind_factor = forest.wind.speed;
 
     for (int i = -SPREAD_RANGE; i <= SPREAD_RANGE; i++) {
         if (0 <= y + i && y + i < forest.height) { //hvis y-værdien er indenfor arrayets y-akse
             for (int j = -SPREAD_RANGE; j <= SPREAD_RANGE; j++) {
-                if (0 <= x + j && x + j < forest.width) { //hvis x-værdien er indenfor arrayets x-akse
+                if (0 <= x + j && x + j < forest.width) {
+                    //hvis x-værdien er indenfor arrayets x-akse
                     tree_t* tree = get_tree(forest, x + j, y + i);
                     //Vi fjerner de fjerne hjørner via. continue
                     if ((i == SPREAD_RANGE && j == SPREAD_RANGE)||
@@ -104,56 +105,44 @@ int check_surrounding_fire_strength(forest_t forest, int x, int y) {
                         (i == -SPREAD_RANGE && j == SPREAD_RANGE)||
                         (i == -SPREAD_RANGE && j == -SPREAD_RANGE)) {
                         continue;
-                    }
+                        }
                     if (tree->status == burning) {
                         //Vi bestemmer fire_strength ift. afstanden. Svagere jo længere væk træet er.
-                        double distance = sqrt(pow(i, 2) + pow(j, 2));
-                        double current_fire_strength = tree->fire_strength / pow(2, distance);
+                        double fire_strength_by_dist = fire_strength_from_distance(*tree, j, i);
+                        not_fire_prob *= 1 - 0.01 * fire_strength_by_dist;
 
 
                         switch (forest.wind.direction) { // Vi tager højde for vind. Ved at tilføje en faktor ift. retning
                             case NORTH:
                                 if (i > 0) {
-                                    total_fire_strength += current_fire_strength + wind_factor;
+                                    not_fire_prob *= 1 - 1 / wind_factor;
                                 }
                                 else if (i < 0) {
-                                    total_fire_strength += current_fire_strength - wind_factor;
-                                }
-                                else {
-                                    total_fire_strength += current_fire_strength;
+                                    not_fire_prob *= 1 + 0.01 * wind_factor;
                                 }
                                 break;
                             case EAST:
                                 if (j < 0) {
-                                    total_fire_strength += current_fire_strength + wind_factor;
+                                    not_fire_prob *= 1 - 1 / wind_factor;
                                 }
                                 else if (j > 0) {
-                                    total_fire_strength += current_fire_strength - wind_factor;
-                                }
-                                else {
-                                    total_fire_strength += current_fire_strength;
+                                    not_fire_prob *= 1 + 0.01 * wind_factor;
                                 }
                                 break;
                             case SOUTH:
                                 if (i < 0) {
-                                    total_fire_strength += current_fire_strength + wind_factor;
+                                    not_fire_prob *= 1 - 1 / wind_factor;
                                 }
                                 else if (i > 0) {
-                                    total_fire_strength += current_fire_strength - wind_factor;
-                                }
-                                else {
-                                    total_fire_strength += current_fire_strength;
+                                    not_fire_prob *= 1 + 0.01 * wind_factor;
                                 }
                                 break;
                             case WEST:
                                 if (j > 0) {
-                                    total_fire_strength += current_fire_strength + wind_factor;
+                                    not_fire_prob *= 1 - 1 / wind_factor;
                                 }
                                 else if (j < 0) {
-                                    total_fire_strength += current_fire_strength - wind_factor;
-                                }
-                                else {
-                                    total_fire_strength += current_fire_strength;
+                                    not_fire_prob *= 1 + 0.01 * wind_factor;
                                 }
                                 break;
                         }
@@ -162,19 +151,10 @@ int check_surrounding_fire_strength(forest_t forest, int x, int y) {
             }
         }
     }
-    return total_fire_strength;
+    return 1 - not_fire_prob;
 }
 
-double calculate_risk_of_burning(forest_t forest, int x, int y) {
-    double chance = 0.0;
-    double fire_strength = check_surrounding_fire_strength(forest, x, y);
 
-    chance += fire_strength * 2;
-
-    chance += get_tree(forest, x, y)->humidity * -10;
-
-    return chance;
-}
 
 void user_drop_water(forest_t forest, int x, int y) {
     for (int i = -1; i <= 1; i++) {
@@ -288,11 +268,14 @@ int* scan_forest_spread(forest_t forest) {
                 trees_to_burn[counter] = -1;
                 counter++;
                 continue;
+            default: ;
             }
+
             //Initialisér risiko for at branden starter som procent fra 0 til 100.
-            double risk_of_burning = calculate_risk_of_burning(forest, j, i);
+            double risk_of_burning = calculate_fire_prob(forest, j, i);
             //Hvis et tilfældigt tal mellem 0 og 99 er under risikoen, så brænder træet. Ellers ikke.
-            if (rand() % 100 < risk_of_burning) {
+            double random_chance = (double)(rand() % 100) / 100 ;
+            if (random_chance < risk_of_burning) {
                 trees_to_burn[counter] = i * forest.width + j;
                 counter++;
             }
@@ -353,7 +336,10 @@ void destroy_tree(forest_t forest, int x, int y, int start_y)
         }
     }
 }
-
+double fire_strength_from_distance(tree_t tree, int a, int b ){
+    double distance = sqrt(pow(a, 2) + pow(b, 2));
+    return tree.fire_strength / pow(distance, 2);
+}
 
 
 

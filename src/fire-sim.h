@@ -20,17 +20,13 @@ typedef struct
 /**
  * Funktion der laver en tilfældig skov, af 'fresh' eller 'empty' træer.
  * Og ændrer deres indhold til at passe dertil
- * @param forest Skoven
  * @param density Sandsynligheden for om et givet træ er 'fresh' eller 'empty'
- * @param size Størrelsen af skoven
  */
 forest_t make_rnd_forest(double density, int width, int height, wind_t wind);
 
 /**
  * Funktion der printer skoven som farver i konsollen baseret på hvert træs status
  * @param forest Træernes array: Skoven.
- * @param height Hvor mange træer høj skoven er
- * @param width Hvor mange træer bred skoven er
  * @param start_y hvor langt ned i konsollen skoven skal udskrives
  */
 void print_forest(forest_t forest, int start_y);
@@ -39,7 +35,6 @@ void print_forest(forest_t forest, int start_y);
  * Funktion der får en tree pointer ud fra koordinater, for at hente info eller ændre i den.
  * @param x 1. koordinat
  * @param y 2. koordinat.
- * @param width Bredden bruges til at tjekke hvornår linjen skiftes
  * @param forest Skoven træet hentes fra
  * @return Pointer til træet
  */
@@ -48,7 +43,6 @@ tree_t* get_tree(forest_t forest, int x, int y);
 /**
  * Funktion der tæller antal træer med en given status
  * @param forest Træernes array: Skoven
- * @param size Skovens størrelse. Height * width
  * @param target Status man leder efter
  * @return Antal træer med status.
  */
@@ -56,16 +50,13 @@ int get_trees_amount(forest_t forest, status_e target);
 
 /**
  * Funktion der skriver hvor mange træer er friske og brændte, samt vindens styrke og retning.
- * @param wind Vindens retning og styrke
- * @param forest Træernes array: Skoven
- * @param size Størrelsen på skoven
+ * @param forest Skoven
  */
 void status_text(forest_t forest);
 
 /**
  * Funktion der checker om der stadig er ild i skoven.
  * @param forest Skoven
- * @param size Skovens størrelse
  * @return Hvis noget brænder 1 ellers 0
  */
 int sim_finished_check(forest_t forest);
@@ -74,7 +65,6 @@ int sim_finished_check(forest_t forest);
  * @param forest Skoven
  * @param x 1. koordinat til træet som skal brænde
  * @param y 2. koordinat til træet som skal brænde
- * @param width Skovens bredde i træer
  */
 void start_fire(forest_t forest, int x, int y);
 
@@ -83,18 +73,15 @@ void start_fire(forest_t forest, int x, int y);
  * @param forest hele skoven
  * @param x x koordinat til det træ hvis omgivelser der skal tjekkes
  * @param y x koordinat til det træ hvis omgivelser der skal tjekkes
- * @param width bredden på skoven
- * @param height højden på skoven
  * @return
  */
-int check_surrounding_fire_strength(forest_t forest, int x, int y);
+double calculate_fire_prob(forest_t forest, int x, int y);
 
 /**
  * Givet et træ, ændres den og de rundtomstående træer til at være våde.
  * @param forest Skoven
  * @param x 1. koordinat
  * @param y 2. koordinat
- * @param width Skovens bredde
  */
 void user_drop_water(forest_t forest, int x, int y);
 
@@ -112,18 +99,11 @@ void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_z
 /**
  * Alt det som skal ske inden for et tick i simulationen
  * @param forest Skoven
- * @param height Skovens højde
- * @param width Skovens bredde
- * @param wind Vindens styrke og retning
- * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
  */
 void tick(forest_t forest);
 /**
  * Funktion der kører simulationen. Gentager tick funktionen indtil simulationen er færdig med et delay på 0,1 sekunder mellem hvert tick
  * @param forest Skoven
- * @param height Skovens højde
- * @param width Skovens bredde
- * @param wind Vindens styrke og retning
  * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
  */
 void fire_sim(forest_t forest, int start_y);
@@ -133,29 +113,15 @@ void fire_sim(forest_t forest, int start_y);
  * Checker hvilke træer der brænder, og sænker fuel_left med en fast værdi.
  * Hvis fuel_left kommer til eller under 0, ændres træets status til burnt, og fire_strength til 0.
  * @param forest Skoven
- * @param height Skovens højde
- * @param width Skovens bredde
  */
 void burndown(forest_t forest);
 
-/**
- * Funktion der givet skovens tilstand og et træ, tjekker hvor vidt træet vil brænde.
- * @param forest Skoven
- * @param x 1. koordinat på træ der skal tjekkes om det brænder
- * @param y 2. koordinat på træ
- * @param width Skovens bredde
- * @param height Skovens højde
- * @return Chance: En double der siger træets risiko for at brænde i procenter fra 1 til 100.
- */
-double calculate_risk_of_burning(forest_t forest, int x, int y);
 
 /**
  * Funktion der for hvert træ i skoven tjekker om det skal brændes vha. trees_to_burn.
  * Hvis trees_to_burn er en NULL pointer eller giver værdien -1, fortsættes,
  * ellers sættes træet til burning med en fast fire_strength.
  * @param forest Skovens tilstand
- * @param height Skovens højde
- * @param width Skovens bredde
  * @param trees_to_burn Et array af alle træer som skal sættes ændres til at brænde
  */
 void spread(forest_t forest, int* trees_to_burn);
@@ -164,12 +130,12 @@ void spread(forest_t forest, int* trees_to_burn);
  * Funktion der givet en skov checker vha. andre funktioner hvilke træer,
  * som burde sættes til at brænde.
  * @param forest Skoven
- * @param height Skovens højde
- * @param width Skovens bredde
  * @return Array af integers som er værdier til et træs plads i arrayet (skoven)
  */
 
 
 int* scan_forest_spread(forest_t forest);
 void destroy_tree(forest_t forest, int x, int y, int start_y);
+double fire_strength_from_distance(tree_t tree, int a, int b );
+
 #endif //FOREST_FIRE_PREVENTION_FIRESIM_H
