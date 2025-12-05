@@ -1,4 +1,6 @@
+
 #include "fire-sim.h"
+#include "probability.h"
 #include "console.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,8 +8,10 @@
 #include <math.h>
 #include <unistd.h>
 #include <pthread.h>
-
+#include "probability.h"
 #include "input.h"
+#include <windows.h>
+
 
 #define BLUE BACKGROUND_BLUE
 #define GREEN BACKGROUND_GREEN
@@ -17,12 +21,8 @@
 #define BLACK 0
 #define TREE_REP "  "
 
-#define RATE_OF_BURN 0.2
-#define STARTING_HEAT 30
-#define STARTING_TREE_FUEL 1.0
-#define SPREAD_HEAT 15
-#define SPREAD_RANGE 2
-#define HEAT_FACTOR 0.1
+
+
 
 forest_t make_rnd_forest(double density, int width, int height, wind_t wind) {
     tree_t* trees = malloc(sizeof(tree_t) * width * height);
@@ -155,22 +155,22 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
     return 1 - not_fire_prob;
 }
 
-
-
 void user_drop_water(forest_t forest, int x, int y) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             tree_t* tree_to_water = get_tree(forest, x+j,y+i);
-
-            tree_to_water->status = wet;
-            tree_to_water->heat = 0;
-            tree_to_water->humidity = 100;
+            if (tree_to_water->status != empty) {
+                tree_to_water->status = wet;
+                tree_to_water->heat = 0;
+                tree_to_water->humidity = 100;
+            }
         }
     }
 }
 
-void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_zone) {
-    if (size_of_dead_zone + x < width || size_of_dead_zone - x >= 0){
+
+void user_dead_zone(forest_t forest, int x, int y, int size_of_dead_zone) {
+    if (size_of_dead_zone + x < forest.width && x - size_of_dead_zone >= 0){
         for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
             get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
             get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
@@ -178,9 +178,32 @@ void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_z
             get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
         }
     }
-    else {
-        printf("Input Error: dead_zone exceeds forest\n");
+    //Hvis dead-zone kommer udenfor forest, skal det selvfølgelig ikke bløde over i de andre linjer.
+    /* Først hvis x - size_of_dead_zone er under 0, skal den venstre linje ikke inkluderes
+     * De vandrette linjer skal kun printes hvis x + j er over 0. Men den højre linje skal printes uanset hvad.
+     */
+    else if (x - size_of_dead_zone < 0) {
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+
+            if (x + j >= 0) {
+                get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
+                get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
+            }
+                get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
+
+        }
     }
+    else if (x + size_of_dead_zone >= forest.width) {
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+            if (x + j < forest.width) {
+                get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
+                get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
+            }
+                get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
+
+        }
+    }
+
 }
 
 int get_trees_amount(forest_t forest, status_e target) {
@@ -267,6 +290,7 @@ int* scan_forest_spread(forest_t forest) {
             case burning:
             case empty:
             case burnt:
+            case wet:
                 trees_to_burn[counter] = -1;
                 counter++;
                 continue;
@@ -364,5 +388,4 @@ double heat_by_fuel_left(tree_t tree) {
     heat *= HEAT_FACTOR;
     return heat;
 }
-
 

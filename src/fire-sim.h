@@ -1,7 +1,16 @@
+
 #ifndef FOREST_FIRE_PREVENTION_FIRESIM_H
 #define FOREST_FIRE_PREVENTION_FIRESIM_H
 #include <windows.h>
 #include <wind.h>
+  
+#define RATE_OF_BURN 0.2
+#define STARTING_HEAT 30
+#define TREE_FUEL 1.0
+#define SPREAD_HEAT 15
+#define SPREAD_RANGE 2
+#define HEAT_FACTOR 0.1
+#define USER_DEAD_ZONE_SIZE 3
 
 
 typedef enum {empty, fresh, burning, burnt, wet} status_e;
@@ -94,7 +103,7 @@ void user_drop_water(forest_t forest, int x, int y);
  * @param width Skovens bredde i træer
  * @param size_of_dead_zone Antal træer fra midten i hver retning ("Radius" på firkanten).
  */
-void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_zone);
+void user_dead_zone(forest_t forest, int x, int y, int size_of_dead_zone);
 
 /**
  * Alt det som skal ske inden for et tick i simulationen
@@ -140,6 +149,5 @@ double heat_from_distance(tree_t tree, double distance);
 double distance_given_coord(int a, int b);
 double heat_prob(double heat);
 double heat_by_fuel_left(tree_t tree);
-
 
 #endif //FOREST_FIRE_PREVENTION_FIRESIM_H
