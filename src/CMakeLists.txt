@@ -6,7 +6,8 @@ add_library(functions
         input.c
         console.c
         vector-math.c
-        probability.c)
+        probability.c
+        ../external/cJSON.c)
 add_executable(main main.c)
 
 target_link_libraries(main functions)
