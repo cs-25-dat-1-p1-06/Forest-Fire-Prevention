@@ -1,1 +1,3 @@
-Vi har startet med at lave lidt kode. Vi har hver vores branch at arbejde på. Forest-density virker nu med at man kan indtaste skovens parametre og density som en procent. Arbejd gerne ud fra den hvis det er.
+Virker kun på windows da vi bruger windows.h
+Brug windows console host som terminal og kør programmet i en ekstern konsol.
+Lav en mappe der hedder 'logs' i working directory for at få output filer.
