@@ -1,10 +1,9 @@
 #include "wind.h"
 #include "vector-math.h"
 #include <math.h>
-
+#include "probability.h"
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "fire-sim.h"
 
 #define WIND_SPEED_MIN 0.5
