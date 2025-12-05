@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <output.c>
 
 
 
@@ -40,8 +41,8 @@ int main(void) {
 
     fire_sim(forest, start_coord.Y);
 
-
-
+    //Laver output
+    //write_output();
     free(forest.trees);
 
     system("pause");

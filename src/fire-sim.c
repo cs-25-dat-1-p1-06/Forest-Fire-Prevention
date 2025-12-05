@@ -195,7 +195,7 @@ int get_trees_amount(forest_t forest, status_e target) {
     return counter;
 }
 
-void status_text(forest_t forest) {
+void status_text(forest_t forest, int tickCount) {
     printf("Status:\n");
     print_wind(&forest.wind);
 
@@ -204,6 +204,7 @@ void status_text(forest_t forest) {
 
     printf("Fresh trees: %4d\n", fresh_count);
     printf("Burnt trees: %4d\n", burnt_count);
+    printf("Tick count: %4d\n", tickCount);
 }
 
 
@@ -308,15 +309,18 @@ void fire_sim(forest_t forest, int start_y) {
     pthread_t input_thread;
     pthread_create(&input_thread, NULL, user_input_loop, &user_input);
 
+    int tickCounter = 0;
+
     do {
         if (!user_input.paused)
         {
             tick(forest);
+            tickCounter++;
         }
 
         print_forest(forest, start_y);
 
-        status_text(forest);
+        status_text(forest,tickCounter);
 
         //Vi beder computeren om at vente 0.1 sekunder (10^5 mikrosekunder) mellem hver iteration
         usleep(pow(10,5));

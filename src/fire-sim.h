@@ -52,7 +52,7 @@ int get_trees_amount(forest_t forest, status_e target);
  * Funktion der skriver hvor mange træer er friske og brændte, samt vindens styrke og retning.
  * @param forest Skoven
  */
-void status_text(forest_t forest);
+void status_text(forest_t forest,int tickCount);
 
 /**
  * Funktion der checker om der stadig er ild i skoven.
