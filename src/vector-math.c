@@ -1,12 +1,17 @@
-//
-// Created by nickl on 04-12-2025.
-//
-
-
 #include "vector-math.h"
-
-
 #include "math.h"
+
+
+vector_t new_vector(double x, double y)
+{
+    vector_t vector;
+    vector.x = x;
+    vector.y = y;
+
+    vector.length = length_of_vector(vector);
+
+    return scalar_product_vector(vector, 1 / vector.length);
+}
 
 double length_of_vector(vector_t vector)
 {
@@ -18,10 +23,13 @@ double dot_product_vectors(vector_t v1, vector_t v2)
     return v1.x * v2.x + v1.y * v2.y;
 }
 
-void scalar_product_vector(vector_t* vector, double factor)
+vector_t scalar_product_vector(vector_t vector, double factor)
 {
-    vector->x *= factor;
-    vector->y *= factor;
+    vector_t scalar_product = vector;
+    scalar_product.x *= factor;
+    scalar_product.y *= factor;
+
+    return scalar_product;
 }
 
 double angle_between_vectors(vector_t v1, vector_t v2)

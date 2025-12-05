@@ -17,11 +17,12 @@ void* user_input_loop(void* args)
 {
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     input_t* input = args;
+    input->y = -MAX_HEIGHT;
 
     while (1)
     {
         //kode loop til bruger input
-        user_input(&input->x, &input->y, &input->command);
+        user_input(&input->x, &input->y, &input->command, input->start_y);
         switch (input->command)
         {
         case pause:
@@ -29,9 +30,8 @@ void* user_input_loop(void* args)
             input->command = none;
             break;
         case forest_thinning:
-            destroy_tree(input->forest, input->x, input->y, input->start_y);
+            destroy_tree(input->forest, input->x, input->y);
         }
-        input->y = -1;
     }
 
     return NULL;
@@ -39,7 +39,7 @@ void* user_input_loop(void* args)
 
 //modificeret version af kode fra
 //https://learn.microsoft.com/en-us/windows/console/reading-input-buffer-events
-void user_input(int *x, int *y, command_e *command)
+void user_input(int *x, int *y, command_e *command, int start_y)
 {
     DWORD fdwSaveOldMode;
     HANDLE hStdin;
@@ -84,7 +84,7 @@ void user_input(int *x, int *y, command_e *command)
 
                 break;
             case MOUSE_EVENT: // mouse input
-                if (MouseEventProc(irInBuf[i].Event.MouseEvent, x, y))
+                if (MouseEventProc(irInBuf[i].Event.MouseEvent, x, y, start_y))
                     no_input = 0;
 
                 break;
@@ -99,12 +99,12 @@ void user_input(int *x, int *y, command_e *command)
 }
 
 //kode der skal køres når brugeren klikker et sted i konsollen
-int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y)
+int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, int start_y)
 {
     if (mer.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED) //hvis brugeren trykker på venstre muse knap
     {
         *x = mer.dwMousePosition.X / 2;
-        *y = mer.dwMousePosition.Y;
+        *y = mer.dwMousePosition.Y - start_y;
         return 1;
     }
     return 0;

@@ -6,12 +6,12 @@
 #include <math.h>
 #include <time.h>
 
-
+#include "probability.h"
 
 
 int main(void) {
     srand(time(NULL));
-
+    // printf("%f", chance_limiter(wind_prob()));
     int width, height;
     double density;
     scan_settings(&width, &height, &density);
@@ -19,7 +19,7 @@ int main(void) {
     console_setup();
 
     //Initiliasere vind
-    wind_t wind = rnd_wind();
+    vector_t wind = rnd_wind();
 
     forest_t forest = make_rnd_forest(density, width, height, wind);
 

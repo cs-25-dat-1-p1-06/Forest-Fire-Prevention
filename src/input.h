@@ -32,7 +32,7 @@ void* user_input_loop(void* args);
  * @param y pointer til y værdien af der hvor brugeren klikker
  * @param command pointer til den command som skal gives baseret på tastatur input
  */
-void user_input(int *x, int *y, command_e *command);
+void user_input(int *x, int *y, command_e *command, int start_y);
 /**
  * tjekker hvor brugeren klikker
  * @param mer muse event
@@ -40,7 +40,7 @@ void user_input(int *x, int *y, command_e *command);
  * @param y pointer til y værdien af der hvor brugeren klikker
  * @return 0 hvis brugeren ikke klikker (uønskede input). 1 hvis brugeren klikker et sted i konsollen
  */
-int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y);
+int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, int start_y);
 
 /**
  * tjekker hvilken tast der bliver trykket
