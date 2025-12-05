@@ -1,5 +1,4 @@
 #include "fire-sim.h"
-#include "probability.h"
 #include "console.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,10 +6,8 @@
 #include <math.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "probability.h"
-#include "input.h"
-#include <windows.h>
 
+#include "input.h"
 
 #define BLUE BACKGROUND_BLUE
 #define GREEN BACKGROUND_GREEN
@@ -20,8 +17,12 @@
 #define BLACK 0
 #define TREE_REP "  "
 
-
-
+#define RATE_OF_BURN 0.2
+#define STARTING_HEAT 30
+#define STARTING_TREE_FUEL 1.0
+#define SPREAD_HEAT 15
+#define SPREAD_RANGE 2
+#define HEAT_FACTOR 0.1
 
 forest_t make_rnd_forest(double density, int width, int height, wind_t wind) {
     tree_t* trees = malloc(sizeof(tree_t) * width * height);
@@ -106,7 +107,7 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
 
                     if (tree->status == burning) {
                         //Vi bestemmer heat ift. afstanden. Svagere jo længere væk træet er.
-                        distance = distance_given_coord(i,j);
+                        double distance = distance_given_coord(i,j);
                         double heat_by_dist = heat_from_distance(*tree, distance);
                         not_fire_prob *= heat_prob(heat_by_dist);
 
@@ -193,7 +194,7 @@ int get_trees_amount(forest_t forest, status_e target) {
     return counter;
 }
 
-void status_text(forest_t forest) {
+void status_text(forest_t forest, int tickCount) {
     printf("Status:\n");
     print_wind(&forest.wind);
 
@@ -202,6 +203,7 @@ void status_text(forest_t forest) {
 
     printf("Fresh trees: %4d\n", fresh_count);
     printf("Burnt trees: %4d\n", burnt_count);
+    printf("Tick count: %4d\n", tickCount);
 }
 
 
@@ -300,21 +302,23 @@ void tick(forest_t forest)
     }
 }
 
-void fire_sim(forest_t forest, int start_y) {
+void fire_sim(forest_t forest, int start_y, int* tickCounter) {
     input_t user_input = {0, -1, 0, 1, forest, start_y};
 
     pthread_t input_thread;
     pthread_create(&input_thread, NULL, user_input_loop, &user_input);
 
+
     do {
         if (!user_input.paused)
         {
             tick(forest);
+            (*tickCounter)++;
         }
 
         print_forest(forest, start_y);
 
-        status_text(forest);
+        status_text(forest,*tickCounter);
 
         //Vi beder computeren om at vente 0.1 sekunder (10^5 mikrosekunder) mellem hver iteration
         usleep(pow(10,5));
@@ -336,6 +340,29 @@ void destroy_tree(forest_t forest, int x, int y, int start_y)
             tree_to_destroy->status = empty;
         }
     }
+}
+double heat_from_distance(tree_t tree, double distance){
+    return heat_by_fuel_left(tree) / (pow(distance, 2) * 2);
+}
+double heat_prob(double heat) {
+    return 1 - heat;
+}
+double wind_prob(wind_t wind) {
+}
+double distance_given_coord(int a, int b) {
+    return sqrt(pow(a, 2) + pow(b, 2));
+}
+double heat_by_fuel_left(tree_t tree) {
+    if (tree.status != burning) return 0;
+
+    double my = STARTING_TREE_FUEL/2;
+    double x = tree.fuel_left;
+    double sigma = 0.2;
+    double heat = 1;
+    heat *= 1 / sqrt(2 * M_PI * pow(sigma,2));
+    heat *= pow(M_E,- pow(x - my,2) / 2 * pow(sigma,2));
+    heat *= HEAT_FACTOR;
+    return heat;
 }
 
 
