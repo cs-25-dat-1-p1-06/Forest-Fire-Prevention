@@ -7,12 +7,12 @@
 #include <time.h>
 #include <output.c>
 
-
+#include "probability.h"
 
 
 int main(void) {
     srand(time(NULL));
-
+    // printf("%f", chance_limiter(wind_prob()));
     int width, height;
     double density;
     scan_settings(&width, &height, &density);
@@ -20,14 +20,12 @@ int main(void) {
     console_setup();
 
     //Initiliasere vind
-    wind_t wind = rnd_wind();
+    vector_t wind = rnd_wind();
 
     forest_t forest = make_rnd_forest(density, width, height, wind);
 
 
     int fire_start_x, fire_start_y;
-    int tickCounter = 0;
-
     do
     {
         fire_start_x = rand() % forest.width;
@@ -40,8 +38,9 @@ int main(void) {
     GetConsoleScreenBufferInfo(hConsole, &start_buffer);
     COORD start_coord = start_buffer.dwCursorPosition;
 
-
+    int tickCounter = 0;
     fire_sim(forest, start_coord.Y, &tickCounter);
+
 
     //Output file
     write_output(forest,tickCounter,width,height,density);

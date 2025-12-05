@@ -8,7 +8,7 @@
 #define STARTING_HEAT 30
 #define TREE_FUEL 1.0
 #define SPREAD_HEAT 15
-#define SPREAD_RANGE 2
+#define SPREAD_RANGE 2.3
 #define HEAT_FACTOR 0.1
 #define USER_DEAD_ZONE_SIZE 3
 
@@ -23,7 +23,7 @@ typedef struct
 {
     tree_t* trees;
     int width, height, size;
-    wind_t wind;
+    vector_t wind;
 } forest_t;
 
 /**
@@ -31,7 +31,7 @@ typedef struct
  * Og ændrer deres indhold til at passe dertil
  * @param density Sandsynligheden for om et givet træ er 'fresh' eller 'empty'
  */
-forest_t make_rnd_forest(double density, int width, int height, wind_t wind);
+forest_t make_rnd_forest(double density, int width, int height, vector_t wind);
 
 /**
  * Funktion der printer skoven som farver i konsollen baseret på hvert træs status
@@ -144,10 +144,7 @@ void spread(forest_t forest, int* trees_to_burn);
 
 
 int* scan_forest_spread(forest_t forest);
-void destroy_tree(forest_t forest, int x, int y, int start_y);
-double heat_from_distance(tree_t tree, double distance);
-double distance_given_coord(int a, int b);
-double heat_prob(double heat);
-double heat_by_fuel_left(tree_t tree);
+void destroy_tree(forest_t forest, int x, int y);
+
 
 #endif //FOREST_FIRE_PREVENTION_FIRESIM_H

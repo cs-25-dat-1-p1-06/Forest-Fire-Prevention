@@ -24,11 +24,11 @@
 
 
 
-forest_t make_rnd_forest(double density, int width, int height, wind_t wind) {
+forest_t make_rnd_forest(double density, int width, int height, vector_t wind) {
     tree_t* trees = malloc(sizeof(tree_t) * width * height);
     forest_t rnd_forest = {trees, width, height, width * height, wind};
     for (int i = 0; i < width * height; i++) {
-        if (rand() % 100 < density * 100){
+        if (random_chance(density * 100)) {
             rnd_forest.trees[i].status = fresh;
             rnd_forest.trees[i].fuel_left = STARTING_TREE_FUEL;
             rnd_forest.trees[i].heat = 0;
@@ -92,61 +92,19 @@ void start_fire(forest_t forest, int x, int y) {
 
 double calculate_fire_prob(forest_t forest, int x, int y) {
     double not_fire_prob = 1;
-    double wind_factor = forest.wind.speed;
 
-    double corner_distance = sqrt(pow(SPREAD_RANGE, 2) + pow(SPREAD_RANGE, 2));
-    for (int i = -SPREAD_RANGE; i <= SPREAD_RANGE; i++) {
+    for (int i = -(int)SPREAD_RANGE; i <= SPREAD_RANGE; i++) {
         if (0 <= y + i && y + i < forest.height) { //hvis y-værdien er indenfor arrayets y-akse
-            for (int j = -SPREAD_RANGE; j <= SPREAD_RANGE; j++) {
+            for (int j = -(int)SPREAD_RANGE; j <= SPREAD_RANGE; j++) {
                 if (0 <= x + j && x + j < forest.width) { //hvis x-værdien er indenfor arrayets x-akse
                     tree_t* tree = get_tree(forest, x + j, y + i);
 
-                    double distance = sqrt(pow(i, 2) + pow(j, 2));
-                    if (distance >= corner_distance)
-                        continue;
-
-                    if (tree->status == burning) {
+                    vector_t distance = new_vector(j, i);
+                    if (tree->status == burning && distance.length <= SPREAD_RANGE) {
                         //Vi bestemmer heat ift. afstanden. Svagere jo længere væk træet er.
-                        double distance = distance_given_coord(i,j);
-                        double heat_by_dist = heat_from_distance(*tree, distance);
+                        double heat_by_dist = heat_from_distance(*tree, distance.length);
                         not_fire_prob *= heat_prob(heat_by_dist);
-
-
-
-                        // switch (forest.wind.direction) { // Vi tager højde for vind. Ved at tilføje en faktor ift. retning
-                        //     case NORTH:
-                        //         if (i > 0) {
-                        //             not_fire_prob *= 1 - 1 / wind_factor;
-                        //         }
-                        //         else if (i < 0) {
-                        //             not_fire_prob *= 1 + 0.01 * wind_factor;
-                        //         }
-                        //         break;
-                        //     case EAST:
-                        //         if (j < 0) {
-                        //             not_fire_prob *= 1 - 1 / wind_factor;
-                        //         }
-                        //         else if (j > 0) {
-                        //             not_fire_prob *= 1 + 0.01 * wind_factor;
-                        //         }
-                        //         break;
-                        //     case SOUTH:
-                        //         if (i < 0) {
-                        //             not_fire_prob *= 1 - 1 / wind_factor;
-                        //         }
-                        //         else if (i > 0) {
-                        //             not_fire_prob *= 1 + 0.01 * wind_factor;
-                        //         }
-                        //         break;
-                        //     case WEST:
-                        //         if (j > 0) {
-                        //             not_fire_prob *= 1 - 1 / wind_factor;
-                        //         }
-                        //         else if (j < 0) {
-                        //             not_fire_prob *= 1 + 0.01 * wind_factor;
-                        //         }
-                        //         break;
-                        // }
+                        not_fire_prob *= wind_prob(forest.wind, distance);
                     }
                 }
             }
@@ -219,7 +177,7 @@ int get_trees_amount(forest_t forest, status_e target) {
 
 void status_text(forest_t forest, int tickCount) {
     printf("Status:\n");
-    print_wind(&forest.wind);
+    print_wind(forest.wind);
 
     int fresh_count = get_trees_amount(forest, fresh);
     int burnt_count = get_trees_amount(forest, burnt);
@@ -294,20 +252,20 @@ int* scan_forest_spread(forest_t forest) {
                 trees_to_burn[counter] = -1;
                 counter++;
                 continue;
-            default: ;
-            }
-
-            //Initialisér risiko for at branden starter som procent fra 0 til 100.
-            double risk_of_burning = calculate_fire_prob(forest, j, i);
-            //Hvis et tilfældigt tal mellem 0 og 99 er under risikoen, så brænder træet. Ellers ikke.
-            double random_chance = (double)(rand() % 101) / 100 ;
-            if (random_chance < risk_of_burning) {
-                trees_to_burn[counter] = i * forest.width + j;
-                counter++;
-            }
-            else {
-                trees_to_burn[counter] = -1;
-                counter++;
+            default:
+                //Initialisér risiko for at branden starter som procent fra 0 til 100.
+                double risk_of_burning = calculate_fire_prob(forest, j, i);
+                //Hvis et tilfældigt tal mellem 0 og 99 er under risikoen, så brænder træet. Ellers ikke.
+                double random_chance = (double)(rand() % 101) / 100 ;
+                if (random_chance < risk_of_burning) {
+                    trees_to_burn[counter] = i * forest.width + j;
+                    counter++;
+                }
+                else {
+                    trees_to_burn[counter] = -1;
+                    counter++;
+                }
+                break;
             }
         }
     }
@@ -327,7 +285,7 @@ void tick(forest_t forest)
 }
 
 void fire_sim(forest_t forest, int start_y, int* tickCounter) {
-    input_t user_input = {0, -1, 0, 1, forest, start_y};
+    input_t user_input = {0, 0, 0, 1, forest, start_y};
 
     pthread_t input_thread;
     pthread_create(&input_thread, NULL, user_input_loop, &user_input);
@@ -354,38 +312,15 @@ void fire_sim(forest_t forest, int start_y, int* tickCounter) {
     printf("Sim is finished!\n");
 }
 
-void destroy_tree(forest_t forest, int x, int y, int start_y)
+void destroy_tree(forest_t forest, int x, int y)
 {
-    if (x < forest.width && 0 <= y - start_y && y - start_y < forest.height)
+    if (x < forest.width && 0 <= y && y < forest.height)
     {
-        tree_t* tree_to_destroy = get_tree(forest, x, y - start_y);
+        tree_t* tree_to_destroy = get_tree(forest, x, y);
         if (tree_to_destroy->status != burning && tree_to_destroy->status != burnt)
         {
             tree_to_destroy->status = empty;
         }
     }
-}
-double heat_from_distance(tree_t tree, double distance){
-    return heat_by_fuel_left(tree) / (pow(distance, 2) * 2);
-}
-double heat_prob(double heat) {
-    return 1 - heat;
-}
-double wind_prob(wind_t wind) {
-}
-double distance_given_coord(int a, int b) {
-    return sqrt(pow(a, 2) + pow(b, 2));
-}
-double heat_by_fuel_left(tree_t tree) {
-    if (tree.status != burning) return 0;
-
-    double my = STARTING_TREE_FUEL/2;
-    double x = tree.fuel_left;
-    double sigma = 0.2;
-    double heat = 1;
-    heat *= 1 / sqrt(2 * M_PI * pow(sigma,2));
-    heat *= pow(M_E,- pow(x - my,2) / 2 * pow(sigma,2));
-    heat *= HEAT_FACTOR;
-    return heat;
 }
 
