@@ -29,7 +29,7 @@ forest_t make_rnd_forest(double density, int width, int height, wind_t wind) {
     for (int i = 0; i < width * height; i++) {
         if (rand() % 100 < density * 100){
             rnd_forest.trees[i].status = fresh;
-            rnd_forest.trees[i].fuel_left = STARTING_TREE_FUEL;
+            rnd_forest.trees[i].fuel_left = TREE_FUEL;
             rnd_forest.trees[i].heat = 0;
             rnd_forest.trees[i].humidity = 1;
         }
@@ -85,7 +85,7 @@ void start_fire(forest_t forest, int x, int y) {
     tree_t *tree = get_tree(forest, x, y);
     tree->status = burning;
     tree->heat = STARTING_HEAT;
-    tree->fuel_left = STARTING_TREE_FUEL;
+    tree->fuel_left = TREE_FUEL;
     //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig?!"
 }
 
@@ -160,16 +160,17 @@ void user_drop_water(forest_t forest, int x, int y) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             tree_t* tree_to_water = get_tree(forest, x+j,y+i);
-
-            tree_to_water->status = wet;
-            tree_to_water->heat = 0;
-            tree_to_water->humidity = 100;
+            if (tree_to_water->status != empty) {
+                tree_to_water->status = wet;
+                tree_to_water->heat = 0;
+                tree_to_water->humidity = 100;
+            }
         }
     }
 }
 
-void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_zone) {
-    if (size_of_dead_zone + x < width || size_of_dead_zone - x >= 0){
+void user_dead_zone(forest_t forest, int x, int y, int size_of_dead_zone) {
+    if (size_of_dead_zone + x < forest.width && x - size_of_dead_zone >= 0){
         for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
             get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
             get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
@@ -177,9 +178,32 @@ void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_z
             get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
         }
     }
-    else {
-        printf("Input Error: dead_zone exceeds forest\n");
+    //Hvis dead-zone kommer udenfor forest, skal det selvfølgelig ikke bløde over i de andre linjer.
+    /* Først hvis x - size_of_dead_zone er under 0, skal den venstre linje ikke inkluderes
+     * De vandrette linjer skal kun printes hvis x + j er over 0. Men den højre linje skal printes uanset hvad.
+     */
+    else if (x - size_of_dead_zone < 0) {
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+
+            if (x + j >= 0) {
+                get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
+                get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
+            }
+                get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
+
+        }
     }
+    else if (x + size_of_dead_zone >= forest.width) {
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+            if (x + j < forest.width) {
+                get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
+                get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
+            }
+                get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
+
+        }
+    }
+
 }
 
 int get_trees_amount(forest_t forest, status_e target) {
@@ -265,6 +289,7 @@ int* scan_forest_spread(forest_t forest) {
             case burning:
             case empty:
             case burnt:
+            case wet:
                 trees_to_burn[counter] = -1;
                 counter++;
                 continue;
@@ -301,8 +326,7 @@ void tick(forest_t forest)
 }
 
 void fire_sim(forest_t forest, int start_y) {
-    input_t user_input = {0, -1, 0, 1, forest, start_y};
-
+    input_t user_input = {0, -forest.height, 0, 1, forest, start_y};
     pthread_t input_thread;
     pthread_create(&input_thread, NULL, user_input_loop, &user_input);
 
@@ -311,9 +335,7 @@ void fire_sim(forest_t forest, int start_y) {
         {
             tick(forest);
         }
-
         print_forest(forest, start_y);
-
         status_text(forest);
 
         //Vi beder computeren om at vente 0.1 sekunder (10^5 mikrosekunder) mellem hver iteration

@@ -4,10 +4,11 @@
 
 #define RATE_OF_BURN 0.2
 #define STARTING_HEAT 30
-#define STARTING_TREE_FUEL 1.0
+#define TREE_FUEL 1.0
 #define SPREAD_HEAT 15
 #define SPREAD_RANGE 2
 #define HEAT_FACTOR 0.1
+#define USER_DEAD_ZONE_SIZE 3
 
 
 
@@ -101,7 +102,7 @@ void user_drop_water(forest_t forest, int x, int y);
  * @param width Skovens bredde i træer
  * @param size_of_dead_zone Antal træer fra midten i hver retning ("Radius" på firkanten).
  */
-void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_zone);
+void user_dead_zone(forest_t forest, int x, int y, int size_of_dead_zone);
 
 /**
  * Alt det som skal ske inden for et tick i simulationen

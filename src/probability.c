@@ -12,6 +12,7 @@ int random_chance(int chance)
 {
     return rand() % 100 + 1 <= chance;
 }
+
 double heat_from_distance(tree_t tree, double distance){
     return heat_by_fuel_left(tree) / (pow(distance, 2) * 2);
 }
@@ -26,7 +27,7 @@ double distance_given_coord(int a, int b) {
 double heat_by_fuel_left(tree_t tree) {
     if (tree.status != burning) return 0;
 
-    double my = STARTING_TREE_FUEL/2;
+    double my = TREE_FUEL/2;
     double x = tree.fuel_left;
     double sigma = 0.2;
     double heat = 1;
