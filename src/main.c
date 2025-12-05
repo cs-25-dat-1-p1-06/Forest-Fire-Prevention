@@ -19,18 +19,20 @@ int main(void) {
     console_setup();
 
     //Initiliasere vind
-    wind_t *wind = (wind_t*) malloc(sizeof(wind_t));
+    wind_t wind = rnd_wind();
 
-    //Tjekker om allokeringen var en success
-    if (wind == NULL) {
-        printf("Der er ikke plads i hukommelsen!");
-        exit(EXIT_FAILURE);
-    }
-    start_wind(wind);
-    forest_t forest = make_rnd_forest(density, width, height, *wind);
+    forest_t forest = make_rnd_forest(density, width, height, wind);
 
 
-    start_fire(forest,5,5);
+    int fire_start_x, fire_start_y;
+    do
+    {
+        fire_start_x = rand() % forest.width;
+        fire_start_y = rand() % forest.height;
+
+    } while (!(get_tree(forest, fire_start_x, fire_start_y)->status != empty));
+
+    start_fire(forest, fire_start_x, fire_start_y);
     CONSOLE_SCREEN_BUFFER_INFO start_buffer;
     GetConsoleScreenBufferInfo(hConsole, &start_buffer);
     COORD start_coord = start_buffer.dwCursorPosition;
@@ -41,10 +43,7 @@ int main(void) {
 
 
     free(forest.trees);
-    free(wind);
 
     system("pause");
     return 0;
 }
-
-

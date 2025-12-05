@@ -1,7 +1,11 @@
 #include "input.h"
+
+#include <pthread.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <windows.h>
+
+#include "console.h"
 
 #define MAX_WIDTH 500
 #define MAX_HEIGHT 100
@@ -11,11 +15,10 @@
 //funktionen skal køres som en anden thread som kan modtage brugerens input imens simulationen kører
 void* user_input_loop(void* args)
 {
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     input_t* input = args;
 
-    input->accept_user_input = 1;
-    //loop sluttter når kode i main kører accept_user_input = 0
-    while (input->accept_user_input)
+    while (1)
     {
         //kode loop til bruger input
         user_input(&input->x, &input->y, &input->command);

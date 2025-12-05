@@ -93,59 +93,21 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
     double not_fire_prob = 1;
     double wind_factor = forest.wind.speed;
 
+    double corner_distance = sqrt(pow(SPREAD_RANGE, 2) + pow(SPREAD_RANGE, 2));
     for (int i = -SPREAD_RANGE; i <= SPREAD_RANGE; i++) {
         if (0 <= y + i && y + i < forest.height) { //hvis y-værdien er indenfor arrayets y-akse
             for (int j = -SPREAD_RANGE; j <= SPREAD_RANGE; j++) {
-                if (0 <= x + j && x + j < forest.width) {
-                    //hvis x-værdien er indenfor arrayets x-akse
+                if (0 <= x + j && x + j < forest.width) { //hvis x-værdien er indenfor arrayets x-akse
                     tree_t* tree = get_tree(forest, x + j, y + i);
-                    //Vi fjerner de fjerne hjørner via. continue
-                    if ((i == SPREAD_RANGE && j == SPREAD_RANGE)||
-                        (i == SPREAD_RANGE && j == -SPREAD_RANGE)||
-                        (i == -SPREAD_RANGE && j == SPREAD_RANGE)||
-                        (i == -SPREAD_RANGE && j == -SPREAD_RANGE)) {
+
+                    double distance = sqrt(pow(i, 2) + pow(j, 2));
+                    if (distance >= corner_distance)
                         continue;
-                        }
+
                     if (tree->status == burning) {
                         //Vi bestemmer fire_strength ift. afstanden. Svagere jo længere væk træet er.
                         double fire_strength_by_dist = fire_strength_from_distance(*tree, j, i);
                         not_fire_prob *= 1 - 0.01 * fire_strength_by_dist;
-
-
-                        switch (forest.wind.direction) { // Vi tager højde for vind. Ved at tilføje en faktor ift. retning
-                            case NORTH:
-                                if (i > 0) {
-                                    not_fire_prob *= 1 - 1 / wind_factor;
-                                }
-                                else if (i < 0) {
-                                    not_fire_prob *= 1 + 0.01 * wind_factor;
-                                }
-                                break;
-                            case EAST:
-                                if (j < 0) {
-                                    not_fire_prob *= 1 - 1 / wind_factor;
-                                }
-                                else if (j > 0) {
-                                    not_fire_prob *= 1 + 0.01 * wind_factor;
-                                }
-                                break;
-                            case SOUTH:
-                                if (i < 0) {
-                                    not_fire_prob *= 1 - 1 / wind_factor;
-                                }
-                                else if (i > 0) {
-                                    not_fire_prob *= 1 + 0.01 * wind_factor;
-                                }
-                                break;
-                            case WEST:
-                                if (j > 0) {
-                                    not_fire_prob *= 1 - 1 / wind_factor;
-                                }
-                                else if (j < 0) {
-                                    not_fire_prob *= 1 + 0.01 * wind_factor;
-                                }
-                                break;
-                        }
                     }
                 }
             }
@@ -301,9 +263,9 @@ void tick(forest_t forest)
 }
 
 void fire_sim(forest_t forest, int start_y) {
-    pthread_t input_thread;
     input_t user_input = {0, -1, 0, 1, forest, start_y};
 
+    pthread_t input_thread;
     pthread_create(&input_thread, NULL, user_input_loop, &user_input);
 
     do {
@@ -321,7 +283,8 @@ void fire_sim(forest_t forest, int start_y) {
 
         //Vi checker om simulationen er færdig
     } while (!sim_finished_check(forest));
-    user_input.accept_user_input = 0;
+    pthread_cancel(input_thread);
+
     printf("Sim is finished!\n");
 }
 
@@ -340,6 +303,4 @@ double fire_strength_from_distance(tree_t tree, int a, int b ){
     double distance = sqrt(pow(a, 2) + pow(b, 2));
     return tree.fire_strength / pow(distance, 2);
 }
-
-
 
