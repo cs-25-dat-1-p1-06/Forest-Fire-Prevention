@@ -21,9 +21,7 @@ void console_setup()
     HWND consoleWindow = GetConsoleWindow(); //tager værdien som Windows bruger til at identificere output vinduet (konsollen)
     ShowWindow(consoleWindow, SW_MAXIMIZE); //maksimerer output vinduet
 
-
     SetConsoleOutputCP(CP_UTF8);
-
 }
 void reset_color()
 {

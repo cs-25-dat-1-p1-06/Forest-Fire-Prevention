@@ -1,0 +1,8 @@
+//
+// Created by nickl on 05-12-2025.
+//
+
+#ifndef FOREST_FIRE_PREVENTION_PROBABILITY_H
+#define FOREST_FIRE_PREVENTION_PROBABILITY_H
+int random_chance(int chance);
+#endif //FOREST_FIRE_PREVENTION_PROBABILITY_H

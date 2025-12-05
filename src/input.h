@@ -15,7 +15,6 @@ typedef struct
     int paused;
     forest_t forest;
     int start_y;
-    int accept_user_input;
 } input_t;
 
 /**

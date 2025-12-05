@@ -4,7 +4,9 @@ add_library(functions
         fire-sim.c
         wind.c
         input.c
-        console.c)
+        console.c
+        vector-math.c
+        probability.c)
 add_executable(main main.c)
 
 target_link_libraries(main functions)
