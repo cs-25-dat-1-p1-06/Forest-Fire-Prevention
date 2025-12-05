@@ -1,14 +1,16 @@
+
 #ifndef FOREST_FIRE_PREVENTION_FIRESIM_H
 #define FOREST_FIRE_PREVENTION_FIRESIM_H
+#include <windows.h>
 #include <wind.h>
-
+  
 #define RATE_OF_BURN 0.2
 #define STARTING_HEAT 30
-#define STARTING_TREE_FUEL 1.0
+#define TREE_FUEL 1.0
 #define SPREAD_HEAT 15
 #define SPREAD_RANGE 2.3
 #define HEAT_FACTOR 0.1
-
+#define USER_DEAD_ZONE_SIZE 3
 
 
 typedef enum {empty, fresh, burning, burnt, wet} status_e;
@@ -59,7 +61,7 @@ int get_trees_amount(forest_t forest, status_e target);
  * Funktion der skriver hvor mange træer er friske og brændte, samt vindens styrke og retning.
  * @param forest Skoven
  */
-void status_text(forest_t forest);
+void status_text(forest_t forest,int tickCount);
 
 /**
  * Funktion der checker om der stadig er ild i skoven.
@@ -101,7 +103,7 @@ void user_drop_water(forest_t forest, int x, int y);
  * @param width Skovens bredde i træer
  * @param size_of_dead_zone Antal træer fra midten i hver retning ("Radius" på firkanten).
  */
-void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_zone);
+void user_dead_zone(forest_t forest, int x, int y, int size_of_dead_zone);
 
 /**
  * Alt det som skal ske inden for et tick i simulationen
@@ -113,7 +115,7 @@ void tick(forest_t forest);
  * @param forest Skoven
  * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
  */
-void fire_sim(forest_t forest, int start_y);
+void fire_sim(forest_t forest, int start_y,int* tickCounter);
 
 
 /**

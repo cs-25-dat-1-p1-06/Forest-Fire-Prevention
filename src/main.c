@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <output.c>
 
 #include "probability.h"
 
@@ -37,11 +38,12 @@ int main(void) {
     GetConsoleScreenBufferInfo(hConsole, &start_buffer);
     COORD start_coord = start_buffer.dwCursorPosition;
 
+    int tickCounter = 0;
+    fire_sim(forest, start_coord.Y, &tickCounter);
 
-    fire_sim(forest, start_coord.Y);
 
-
-
+    //Output file
+    write_output(forest,tickCounter,width,height,density);
     free(forest.trees);
 
     system("pause");

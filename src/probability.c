@@ -49,7 +49,7 @@ double distance_given_coord(int a, int b) {
 double heat_by_fuel_left(tree_t tree) {
     if (tree.status != burning) return 0;
 
-    double my = STARTING_TREE_FUEL/2;
+    double my = TREE_FUEL/2;
     double x = tree.fuel_left;
     double sigma = 0.2;
     double heat = 1;

@@ -4,7 +4,7 @@
 #include "fire-sim.h"
 
 //every possible user command
-typedef enum {none = 0x00, pause = 0x20, forest_thinning = 0x46} command_e;
+typedef enum {none = 0x00, pause = 0x20, forest_thinning = 0x46, drop_water = 0x57, dead_zone = 0x44} command_e;
 
 //example struct in case it is useable
 typedef struct

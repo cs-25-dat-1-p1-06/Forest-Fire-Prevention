@@ -1,10 +1,8 @@
 #include "input.h"
-
 #include <pthread.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <windows.h>
-
 #include "console.h"
 
 #define MAX_WIDTH 500
@@ -31,6 +29,12 @@ void* user_input_loop(void* args)
             break;
         case forest_thinning:
             destroy_tree(input->forest, input->x, input->y);
+            break;
+        case drop_water:
+                user_drop_water(input->forest, input->x, input->y);
+                break;
+        case dead_zone:
+                user_dead_zone(input->forest,input->x,input->y,USER_DEAD_ZONE_SIZE);
         }
     }
 
@@ -124,6 +128,11 @@ int KeyEventProc(KEY_EVENT_RECORD ker, command_e *command)
 }
 
 void scan_settings(int* width, int* height, double* density) {
+    printf("To access diferent modes use the following keys:\n");
+    printf("Forest Thinning: 'F'\n");
+    printf("Water Drop: 'W'\n");
+    printf("Dead Zone (size of 3): 'D'\n");
+    printf("Pause: 'Space'\n");
     do {
         printf("Please enter a width, height, and forest density (0.00 - 1):\n");
         scanf(" %d %d %lf", width, height, density);

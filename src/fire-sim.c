@@ -1,3 +1,4 @@
+
 #include "fire-sim.h"
 #include "probability.h"
 #include "console.h"
@@ -112,22 +113,22 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
     return 1 - not_fire_prob;
 }
 
-
-
 void user_drop_water(forest_t forest, int x, int y) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             tree_t* tree_to_water = get_tree(forest, x+j,y+i);
-
-            tree_to_water->status = wet;
-            tree_to_water->heat = 0;
-            tree_to_water->humidity = 100;
+            if (tree_to_water->status != empty) {
+                tree_to_water->status = wet;
+                tree_to_water->heat = 0;
+                tree_to_water->humidity = 100;
+            }
         }
     }
 }
 
-void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_zone) {
-    if (size_of_dead_zone + x < width || size_of_dead_zone - x >= 0){
+
+void user_dead_zone(forest_t forest, int x, int y, int size_of_dead_zone) {
+    if (size_of_dead_zone + x < forest.width && x - size_of_dead_zone >= 0){
         for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
             get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
             get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
@@ -135,9 +136,32 @@ void user_dead_zone(forest_t forest, int x, int y, int width, int size_of_dead_z
             get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
         }
     }
-    else {
-        printf("Input Error: dead_zone exceeds forest\n");
+    //Hvis dead-zone kommer udenfor forest, skal det selvfølgelig ikke bløde over i de andre linjer.
+    /* Først hvis x - size_of_dead_zone er under 0, skal den venstre linje ikke inkluderes
+     * De vandrette linjer skal kun printes hvis x + j er over 0. Men den højre linje skal printes uanset hvad.
+     */
+    else if (x - size_of_dead_zone < 0) {
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+
+            if (x + j >= 0) {
+                get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
+                get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
+            }
+                get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
+
+        }
     }
+    else if (x + size_of_dead_zone >= forest.width) {
+        for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
+            if (x + j < forest.width) {
+                get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
+                get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
+            }
+                get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
+
+        }
+    }
+
 }
 
 int get_trees_amount(forest_t forest, status_e target) {
@@ -151,7 +175,7 @@ int get_trees_amount(forest_t forest, status_e target) {
     return counter;
 }
 
-void status_text(forest_t forest) {
+void status_text(forest_t forest, int tickCount) {
     printf("Status:\n");
     print_wind(forest.wind);
 
@@ -160,6 +184,7 @@ void status_text(forest_t forest) {
 
     printf("Fresh trees: %4d\n", fresh_count);
     printf("Burnt trees: %4d\n", burnt_count);
+    printf("Tick count: %4d\n", tickCount);
 }
 
 
@@ -223,6 +248,7 @@ int* scan_forest_spread(forest_t forest) {
             case burning:
             case empty:
             case burnt:
+            case wet:
                 trees_to_burn[counter] = -1;
                 counter++;
                 continue;
@@ -258,21 +284,23 @@ void tick(forest_t forest)
     }
 }
 
-void fire_sim(forest_t forest, int start_y) {
+void fire_sim(forest_t forest, int start_y, int* tickCounter) {
     input_t user_input = {0, 0, 0, 1, forest, start_y};
 
     pthread_t input_thread;
     pthread_create(&input_thread, NULL, user_input_loop, &user_input);
 
+
     do {
         if (!user_input.paused)
         {
             tick(forest);
+            (*tickCounter)++;
         }
 
         print_forest(forest, start_y);
 
-        status_text(forest);
+        status_text(forest,*tickCounter);
 
         //Vi beder computeren om at vente 0.1 sekunder (10^5 mikrosekunder) mellem hver iteration
         usleep(pow(10,5));
@@ -295,5 +323,4 @@ void destroy_tree(forest_t forest, int x, int y)
         }
     }
 }
-
 
