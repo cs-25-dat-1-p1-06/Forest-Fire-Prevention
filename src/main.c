@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <output.c>
 
 
 
@@ -25,6 +26,8 @@ int main(void) {
 
 
     int fire_start_x, fire_start_y;
+    int tickCounter = 0;
+
     do
     {
         fire_start_x = rand() % forest.width;
@@ -38,10 +41,10 @@ int main(void) {
     COORD start_coord = start_buffer.dwCursorPosition;
 
 
-    fire_sim(forest, start_coord.Y);
+    fire_sim(forest, start_coord.Y, &tickCounter);
 
-
-
+    //Output file
+    write_output(forest,tickCounter,width,height,density);
     free(forest.trees);
 
     system("pause");
