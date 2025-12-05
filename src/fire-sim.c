@@ -30,7 +30,7 @@ forest_t make_rnd_forest(double density, int width, int height, vector_t wind) {
     for (int i = 0; i < width * height; i++) {
         if (random_chance(density * 100)) {
             rnd_forest.trees[i].status = fresh;
-            rnd_forest.trees[i].fuel_left = STARTING_TREE_FUEL;
+            rnd_forest.trees[i].fuel_left = TREE_FUEL;
             rnd_forest.trees[i].heat = 0;
             rnd_forest.trees[i].humidity = 1;
         }
@@ -86,7 +86,7 @@ void start_fire(forest_t forest, int x, int y) {
     tree_t *tree = get_tree(forest, x, y);
     tree->status = burning;
     tree->heat = STARTING_HEAT;
-    tree->fuel_left = STARTING_TREE_FUEL;
+    tree->fuel_left = TREE_FUEL;
     //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig?!"
 }
 
