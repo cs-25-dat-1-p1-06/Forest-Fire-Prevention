@@ -4,7 +4,6 @@
 #include "probability.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "fire-sim.h"
 
 #define WIND_SPEED_MIN 0.5
 #define WIND_SPEED_MAX 15

@@ -1,7 +1,3 @@
-//
-// Created by nickl on 05-12-2025.
-//
-
 #ifndef FOREST_FIRE_PREVENTION_PROBABILITY_H
 #define FOREST_FIRE_PREVENTION_PROBABILITY_H
 #include "fire-sim.h"

@@ -1,7 +1,6 @@
 
 #ifndef FOREST_FIRE_PREVENTION_FIRESIM_H
 #define FOREST_FIRE_PREVENTION_FIRESIM_H
-#include <windows.h>
 #include <wind.h>
   
 #define RATE_OF_BURN 0.2

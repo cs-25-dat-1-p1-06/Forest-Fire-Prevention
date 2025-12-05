@@ -7,9 +7,6 @@
 #include <time.h>
 #include <output.c>
 
-#include "probability.h"
-
-
 int main(void) {
     srand(time(NULL));
     // printf("%f", chance_limiter(wind_prob()));

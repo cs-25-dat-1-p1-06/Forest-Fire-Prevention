@@ -1,4 +1,3 @@
-
 #include "fire-sim.h"
 #include "probability.h"
 #include "console.h"
@@ -8,9 +7,7 @@
 #include <math.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "probability.h"
 #include "input.h"
-#include <windows.h>
 
 
 #define BLUE BACKGROUND_BLUE
