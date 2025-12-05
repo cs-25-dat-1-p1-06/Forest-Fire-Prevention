@@ -7,7 +7,7 @@
 typedef enum {empty, fresh, burning, burnt, wet} status_e;
 typedef struct {
     status_e status;
-    double humidity, fire_strength, fuel_left;
+    double humidity, heat, fuel_left;
 } tree_t;
 
 typedef struct
@@ -136,6 +136,10 @@ void spread(forest_t forest, int* trees_to_burn);
 
 int* scan_forest_spread(forest_t forest);
 void destroy_tree(forest_t forest, int x, int y, int start_y);
-double fire_strength_from_distance(tree_t tree, int a, int b );
+double heat_from_distance(tree_t tree, double distance);
+double distance_given_coord(int a, int b);
+double heat_prob(double heat);
+double heat_by_fuel_left(tree_t tree);
+
 
 #endif //FOREST_FIRE_PREVENTION_FIRESIM_H
