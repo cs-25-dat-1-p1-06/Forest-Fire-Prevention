@@ -106,7 +106,7 @@ void tick(forest_t forest);
  * @param forest Skoven
  * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
  */
-void fire_sim(forest_t forest, int start_y);
+void fire_sim(forest_t forest, int start_y,int* tickCounter);
 
 
 /**

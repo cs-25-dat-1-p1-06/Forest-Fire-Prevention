@@ -1,25 +1,34 @@
 #include <../external/cJSON.h>
 #include <stdio.h>
+#include <fire-sim.h>
 
-void write_output() {
-    // Laver et cJSON objekt
-    cJSON *json = cJSON_CreateObject();
-    cJSON_AddStringToObject(json, "name", "John Doe");
-    cJSON_AddNumberToObject(json, "age", 30);
-    cJSON_AddStringToObject(json, "email", "john.doe@example.com");
+void write_output(forest_t forest, int tickCount,int width,int height, double density) {
 
-    // convert the cJSON object to a JSON string
-    char *json_str = cJSON_Print(json);
+    // Laver et cJSON objekt til output
+    cJSON *output = cJSON_CreateObject();
+    cJSON *settings; //objekt til settings værdier
+    cJSON *results; //objekt til results værdier
 
-    // write the JSON string to a file
+    cJSON_AddItemToObject(output, "settings", settings = cJSON_CreateObject());
+    cJSON_AddNumberToObject(settings,"width",width);
+    cJSON_AddNumberToObject(settings,"height",height);
+    cJSON_AddNumberToObject(settings,"density",density);
+    cJSON_AddItemToObject(output, "results", results = cJSON_CreateObject());
+    cJSON_AddNumberToObject(results, "fresh", get_trees_amount(forest,fresh));
+    cJSON_AddNumberToObject(results, "burnt", get_trees_amount(forest,burnt));
+    cJSON_AddNumberToObject(output, "ticks", tickCount);
+
+    // Konveterer cJSON objektet til en JSON streng
+    char *json_str = cJSON_Print(output);
+
+    // Udksriv JSON strengen til en fil
     FILE *fp = fopen("./logs/output.json", "w");
     if (fp == NULL) {
         printf("Error: Unable to open the file.\n");
         return;
     }
-    printf("%s\n", json_str);
     fputs(json_str, fp);
-    // free the JSON string and cJSON object
+    // Frigiv JSON strengen og cJSON objekt fra hukommelsen
     cJSON_free(json_str);
-    cJSON_Delete(json);
+    cJSON_Delete(output);
 }

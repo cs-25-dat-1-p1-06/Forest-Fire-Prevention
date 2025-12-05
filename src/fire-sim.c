@@ -24,7 +24,6 @@
 #define SPREAD_RANGE 2
 #define HEAT_FACTOR 0.1
 
-
 forest_t make_rnd_forest(double density, int width, int height, wind_t wind) {
     tree_t* trees = malloc(sizeof(tree_t) * width * height);
     forest_t rnd_forest = {trees, width, height, width * height, wind};
@@ -303,24 +302,23 @@ void tick(forest_t forest)
     }
 }
 
-void fire_sim(forest_t forest, int start_y) {
+void fire_sim(forest_t forest, int start_y, int* tickCounter) {
     input_t user_input = {0, -1, 0, 1, forest, start_y};
 
     pthread_t input_thread;
     pthread_create(&input_thread, NULL, user_input_loop, &user_input);
 
-    int tickCounter = 0;
 
     do {
         if (!user_input.paused)
         {
             tick(forest);
-            tickCounter++;
+            (*tickCounter)++;
         }
 
         print_forest(forest, start_y);
 
-        status_text(forest,tickCounter);
+        status_text(forest,*tickCounter);
 
         //Vi beder computeren om at vente 0.1 sekunder (10^5 mikrosekunder) mellem hver iteration
         usleep(pow(10,5));
