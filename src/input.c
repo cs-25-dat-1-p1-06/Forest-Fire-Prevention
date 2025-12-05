@@ -128,7 +128,7 @@ int KeyEventProc(KEY_EVENT_RECORD ker, command_e *command)
 }
 
 void scan_settings(int* width, int* height, double* density) {
-    printf("To access diferent modes use the following keys:\n");
+    printf("To access different modes use the following keys:\n");
     printf("Forest Thinning: 'F'\n");
     printf("Water Drop: 'W'\n");
     printf("Dead Zone (size of 3): 'D'\n");
