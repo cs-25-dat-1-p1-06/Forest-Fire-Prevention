@@ -18,16 +18,16 @@ vector_t rnd_wind() {
         wind = new_vector(x, y);
     } while (!(WIND_SPEED_MIN <= wind.length && wind.length <= WIND_SPEED_MAX));
 
-    if (random_chance(50))
+    if (random_chance(0.5))
     {
         x *= -1;
     }
-    if (random_chance(50))
+    if (random_chance(0.5))
     {
         y *= -1;
     }
 
-    return  new_vector(x, y);
+    return new_vector(x, y);
 }
 
 void print_wind(vector_t wind) {

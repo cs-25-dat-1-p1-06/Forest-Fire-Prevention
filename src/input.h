@@ -1,5 +1,7 @@
 #ifndef FOREST_FIRE_PREVENTION_INPUT_H
 #define FOREST_FIRE_PREVENTION_INPUT_H
+#include <pthread.h>
+
 #include "windows.h"
 #include "fire-sim.h"
 
@@ -11,10 +13,11 @@ typedef struct
 {
     int x;
     int y;
+    short start_y;
     command_e command;
     int paused;
     forest_t forest;
-    int start_y;
+    pthread_mutex_t* accept_user_input;
 } input_t;
 
 /**
@@ -32,7 +35,8 @@ void* user_input_loop(void* args);
  * @param y pointer til y værdien af der hvor brugeren klikker
  * @param command pointer til den command som skal gives baseret på tastatur input
  */
-void user_input(int *x, int *y, command_e *command, int start_y);
+void user_input(input_t* input);
+
 /**
  * tjekker hvor brugeren klikker
  * @param mer muse event

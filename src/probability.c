@@ -4,9 +4,11 @@
 #include "fire-sim.h"
 
 
-int random_chance(int chance)
+int random_chance(double chance)
 {
-    return rand() % 100 + 1 <= chance;
+    if (chance <= 0 || chance >= 1)
+        return (int)chance_limiter(chance);
+    return (double)(rand() % 101) / 100 <= chance;
 }
 
 double chance_limiter(double chance)

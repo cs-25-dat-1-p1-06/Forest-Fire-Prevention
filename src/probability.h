@@ -2,7 +2,7 @@
 #define FOREST_FIRE_PREVENTION_PROBABILITY_H
 #include "fire-sim.h"
 
-int random_chance(int chance);
+int random_chance(double chance);
 double chance_limiter(double chance);
 double heat_from_distance(tree_t tree, double distance);
 double distance_given_coord(int a, int b);

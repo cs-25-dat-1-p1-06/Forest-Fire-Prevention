@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <windows.h>
 #include "console.h"
 
@@ -13,14 +14,15 @@
 //funktionen skal køres som en anden thread som kan modtage brugerens input imens simulationen kører
 void* user_input_loop(void* args)
 {
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     input_t* input = args;
-    input->y = -MAX_HEIGHT;
 
-    while (1)
+    //hvis accept_user_input er en ulåst mutex stoppes loopet
+    while (pthread_mutex_trylock(input->accept_user_input) == EBUSY)
     {
+        input->y = -MAX_HEIGHT;
         //kode loop til bruger input
-        user_input(&input->x, &input->y, &input->command, input->start_y);
+        user_input(input);
+
         switch (input->command)
         {
         case pause:
@@ -28,27 +30,27 @@ void* user_input_loop(void* args)
             input->command = none;
             break;
         case forest_thinning:
-            destroy_tree(input->forest, input->x, input->y);
+            change_tree(input->forest, empty, input->x, input->y);
             break;
         case drop_water:
-                user_drop_water(input->forest, input->x, input->y);
-                break;
+            user_drop_water(input->forest, USER_SPLASH_ZONE_SIZE, input->x, input->y);
+            break;
         case dead_zone:
-                user_dead_zone(input->forest,input->x,input->y,USER_DEAD_ZONE_SIZE);
+            user_dead_zone(input->forest, USER_DEAD_ZONE_SIZE, input->x, input->y);
+            break;
         }
     }
-
     return NULL;
 }
 
 //modificeret version af kode fra
 //https://learn.microsoft.com/en-us/windows/console/reading-input-buffer-events
-void user_input(int *x, int *y, command_e *command, int start_y)
+void user_input(input_t* input)
 {
     DWORD fdwSaveOldMode;
     HANDLE hStdin;
 
-    DWORD cNumRead, fdwMode, i;
+    DWORD cNumRead, fdwMode;
     INPUT_RECORD irInBuf[128];
 
     //får standard input handle
@@ -66,37 +68,27 @@ void user_input(int *x, int *y, command_e *command, int start_y)
     if (! SetConsoleMode(hStdin, fdwMode) )
         exit(EXIT_FAILURE);
 
-    int no_input = 1;
-    while (no_input)
-    {
-        //venter på en event
-        if (! ReadConsoleInput(
-                hStdin,      // input buffer handle
-                irInBuf,     // buffer to read into
-                128,         // size of read buffer
-                &cNumRead) ) // number of records read
-                    exit(EXIT_FAILURE);
+
+    if (! ReadConsoleInput(
+            hStdin,      // input buffer handle
+            irInBuf,     // buffer to read into
+            128,         // size of read buffer
+            &cNumRead) ) // number of records read
+                exit(EXIT_FAILURE);
 
         //deler events ud til en passende funktion
-        for (i = 0; i < cNumRead; i++)
+        for (int i = 0; i < cNumRead; i++)
         {
             switch(irInBuf[i].EventType)
             {
-            case KEY_EVENT: //keyboard input
-                if (KeyEventProc(irInBuf[i].Event.KeyEvent, command))
-                    no_input = 0;
-
-                break;
-            case MOUSE_EVENT: // mouse input
-                if (MouseEventProc(irInBuf[i].Event.MouseEvent, x, y, start_y))
-                    no_input = 0;
-
-                break;
-            default:
-                break;
+                case KEY_EVENT: //keyboard input
+                    KeyEventProc(irInBuf[i].Event.KeyEvent, &input->command);
+                    break;
+                case MOUSE_EVENT: // mouse input
+                    MouseEventProc(irInBuf[i].Event.MouseEvent, &input->x, &input->y, input->start_y);
+                    break;
             }
         }
-    } //looper uendeligt indtil brugeren laver et gyldigt input
 
     //gendanner input mode inden slut
     SetConsoleMode(hStdin, fdwSaveOldMode);
