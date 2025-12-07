@@ -71,9 +71,9 @@ void user_input(input_t* input)
 
     if (! ReadConsoleInput(
             hStdin,      // input buffer handle
-            irInBuf,     // buffer to read into
-            128,         // size of read buffer
-            &cNumRead) ) // number of records read
+            irInBuf,     // buffer der skal læses ind i
+            128,         // størrelsen på read buffer
+            &cNumRead) ) // antallet af input der bliver læst
                 exit(EXIT_FAILURE);
 
         //deler events ud til en passende funktion
