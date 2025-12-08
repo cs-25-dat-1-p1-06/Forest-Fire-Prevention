@@ -10,6 +10,8 @@
 #define SPREAD_RANGE 2.3
 #define HEAT_FACTOR 0.1
 #define USER_DEAD_ZONE_SIZE 3
+#define USER_SPLASH_ZONE_SIZE 2
+#define WET_TREE_HUMIDITY 100
 
 
 typedef enum {empty, fresh, burning, burnt, wet} status_e;
@@ -37,7 +39,18 @@ forest_t make_rnd_forest(double density, int width, int height, vector_t wind);
  * @param forest Træernes array: Skoven.
  * @param start_y hvor langt ned i konsollen skoven skal udskrives
  */
-void print_forest(forest_t forest, int start_y);
+void print_forest(forest_t forest, short start_y);
+
+void print_tree(tree_t tree);
+
+
+void change_tree(forest_t forest, status_e new_status, int x, int y);
+void destroy_tree(tree_t* tree_to_destroy);
+void create_tree(tree_t* tree_to_create);
+void burn_tree(tree_t* tree_to_burn);
+void finish_burn(tree_t* tree_to_burnt);
+void water_tree(tree_t* tree_to_water);
+
 
 /**
  * Funktion der får en tree pointer ud fra koordinater, for at hente info eller ændre i den.
@@ -91,7 +104,7 @@ double calculate_fire_prob(forest_t forest, int x, int y);
  * @param x 1. koordinat
  * @param y 2. koordinat
  */
-void user_drop_water(forest_t forest, int x, int y);
+void user_drop_water(forest_t forest, int size_of_splash, int x, int y);
 
 /**
  * Funktion der laver en firkant rundt om et givet træ af træer med status "empty",
@@ -102,7 +115,7 @@ void user_drop_water(forest_t forest, int x, int y);
  * @param width Skovens bredde i træer
  * @param size_of_dead_zone Antal træer fra midten i hver retning ("Radius" på firkanten).
  */
-void user_dead_zone(forest_t forest, int x, int y, int size_of_dead_zone);
+void user_dead_zone(forest_t forest, int size_of_dead_zone, int x, int y);
 
 /**
  * Alt det som skal ske inden for et tick i simulationen
@@ -114,8 +127,7 @@ void tick(forest_t forest);
  * @param forest Skoven
  * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
  */
-void fire_sim(forest_t forest, int start_y,int* tickCounter);
-
+void fire_sim(forest_t forest, int* tickCounter, short start_y);
 
 /**
  * Checker hvilke træer der brænder, og sænker fuel_left med en fast værdi.
@@ -143,7 +155,6 @@ void spread(forest_t forest, int* trees_to_burn);
 
 
 int* scan_forest_spread(forest_t forest);
-void destroy_tree(forest_t forest, int x, int y);
-
+int check_bounds(forest_t forest, int x, int y);
 
 #endif //FOREST_FIRE_PREVENTION_FIRESIM_H
