@@ -386,11 +386,10 @@ void fire_sim(forest_t forest, int* tickCounter, short start_y) {
 
         //Vi checker om simulationen er færdig
     } while (!sim_finished_check(forest));
-
+    printf("Sim is finished!\n");
+    
     pthread_mutex_unlock(&accept_user_input);
     pthread_join(input_thread, NULL);
-
-    printf("Sim is finished!\n");
 }
 
 void status_text(forest_t forest, int tickCount) {
