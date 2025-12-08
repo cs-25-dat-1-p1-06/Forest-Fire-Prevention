@@ -31,7 +31,7 @@ forest_t make_rnd_forest(double density, int width, int height, vector_t wind) {
             rnd_forest.trees[i].status = fresh;
             rnd_forest.trees[i].fuel_left = TREE_FUEL;
             rnd_forest.trees[i].heat = 0;
-            rnd_forest.trees[i].humidity = 1;
+            rnd_forest.trees[i].humidity = STARTING_HUMIDITY;
         }
         else {
             rnd_forest.trees[i].status = empty;
@@ -139,8 +139,8 @@ void burn_tree(tree_t* tree_to_burn)
     {
         tree_to_burn->status = burning;
         tree_to_burn->humidity = 0;
-        tree_to_burn->heat = SPREAD_HEAT;
         tree_to_burn->fuel_left = TREE_FUEL;
+        heat_by_fuel_left(tree_to_burn);
     }
 }
 
@@ -169,7 +169,7 @@ void start_fire(forest_t forest, int x, int y) {
     if (check_bounds(forest, x, y)) {
         tree_t* tree_to_burn = get_tree(forest, x, y);
         burn_tree(tree_to_burn);
-        tree_to_burn->heat = STARTING_HEAT;
+        tree_to_burn->heat = MAX_HEAT;
     }
     //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig?!"
 }
@@ -188,6 +188,7 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
                     double heat_by_dist = heat_from_distance(tree->heat, distance.length);
                     not_fire_prob *= heat_prob(heat_by_dist);
                     not_fire_prob *= wind_prob(forest.wind, distance);
+                    not_fire_prob *= 1 - tree->humidity * 0.01;
                 }
             }
         }
@@ -252,8 +253,7 @@ void burndown(forest_t forest) {
 }
 
 
-int sim_finished_check(forest_t forest)
-{
+int sim_finished_check(forest_t forest) {
     int counter = get_trees_amount(forest, burning);
     if (counter > 0) {
         return 0;
@@ -265,9 +265,8 @@ void spread(forest_t forest, int* trees_to_burn) {
     if (trees_to_burn != NULL)
     {
         for (int i = 0; i < forest.size; i++) {
-            if (&trees_to_burn[i] == NULL || trees_to_burn[i] == -1) {
-                continue;
-            }
+            if (&trees_to_burn[i] == NULL || trees_to_burn[i] == -1) continue;
+
             int x = trees_to_burn[i] % forest.width;
             int y = trees_to_burn[i] / forest.width;
             change_tree(forest, burning, x, y);
