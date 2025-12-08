@@ -181,11 +181,11 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
         for (int j = -(int)SPREAD_RANGE; j <= SPREAD_RANGE; j++) {
             if (check_bounds(forest, x + j, y + i)) { //hvis både x- og y-værdien er indenfor arrayet
                 tree_t* tree = get_tree(forest, x + j, y + i);
-
                 vector_t distance = new_vector(-j, i);
+
                 if (tree->status == burning && distance.length <= SPREAD_RANGE) {
                     //Vi bestemmer heat ift. afstanden. Svagere jo længere væk træet er.
-                    double heat_by_dist = heat_from_distance(*tree, distance.length);
+                    double heat_by_dist = heat_from_distance(tree->heat, distance.length);
                     not_fire_prob *= heat_prob(heat_by_dist);
                     not_fire_prob *= wind_prob(forest.wind, distance);
                 }
@@ -212,41 +212,6 @@ void user_dead_zone(forest_t forest, int size_of_dead_zone, int x, int y) {
         change_tree(forest, empty, size_of_dead_zone + x, i + y);
         change_tree(forest, empty, -size_of_dead_zone + x, i + y);
     }
-    //
-    // if (size_of_dead_zone + x < forest.width && x - size_of_dead_zone >= 0){
-    //     for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
-    //         get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
-    //         get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
-    //         get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
-    //         get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
-    //     }
-    // }
-    // //Hvis dead-zone kommer udenfor forest, skal det selvfølgelig ikke bløde over i de andre linjer.
-    // /* Først hvis x - size_of_dead_zone er under 0, skal den venstre linje ikke inkluderes
-    //  * De vandrette linjer skal kun printes hvis x + j er over 0. Men den højre linje skal printes uanset hvad.
-    //  */
-    // else if (x - size_of_dead_zone < 0) {
-    //     for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
-    //
-    //         if (x + j >= 0) {
-    //             get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
-    //             get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
-    //         }
-    //             get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
-    //
-    //     }
-    // }
-    // else if (x + size_of_dead_zone >= forest.width) {
-    //     for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
-    //         if (x + j < forest.width) {
-    //             get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
-    //             get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
-    //         }
-    //             get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
-    //
-    //     }
-    // }
-
 }
 
 
@@ -275,6 +240,8 @@ void burndown(forest_t forest) {
 
             if (tree->status == burning) {
                 tree->fuel_left -= RATE_OF_BURN;
+                heat_by_fuel_left(tree);
+
             }
             //Hvis brændstof er 0, ændres status til burnt.
             if (tree->fuel_left <= 0) {
