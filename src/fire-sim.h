@@ -4,15 +4,14 @@
 #include <wind.h>
   
 #define RATE_OF_BURN 0.2
-#define STARTING_HEAT 0.5
-#define TREE_FUEL 1.0
-#define SPREAD_HEAT 15
+#define MAX_HEAT 0.2
 #define SPREAD_RANGE 2.3
-#define HEAT_FACTOR 0.1
 #define USER_DEAD_ZONE_SIZE 3
 #define USER_SPLASH_ZONE_SIZE 2
 #define WET_TREE_HUMIDITY 100
-#define MAX_HEAT 0.2
+#define TREE_FUEL 1.0
+#define STARTING_HUMIDITY 10
+
 
 typedef enum {empty, fresh, burning, burnt, wet} status_e;
 typedef struct {
