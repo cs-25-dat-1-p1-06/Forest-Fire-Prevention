@@ -128,7 +128,7 @@ void destroy_tree(tree_t* tree_to_destroy)
 void create_tree(tree_t* tree_to_create)
 {
     tree_to_create->status = fresh;
-    tree_to_create->humidity = 1;
+    tree_to_create->humidity = STARTING_HUMIDITY;
     tree_to_create->heat = 0;
     tree_to_create->fuel_left = TREE_FUEL;
 }
@@ -188,12 +188,11 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
                     double heat_by_dist = heat_from_distance(tree->heat, distance.length);
                     not_fire_prob *= heat_prob(heat_by_dist);
                     not_fire_prob *= wind_prob(forest.wind, distance);
-                    not_fire_prob *= 1 - tree->humidity * 0.01;
                 }
             }
         }
     }
-    return 1 - not_fire_prob;
+    return humidity_prob(*get_tree(forest, x, y)) * (1 - not_fire_prob);
 }
 
 void user_drop_water(forest_t forest, int size_of_splash, int x, int y) {

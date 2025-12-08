@@ -44,6 +44,10 @@ double wind_prob(vector_t wind, vector_t position) {
     return chance_limiter(1 - probability);
 }
 
+double humidity_prob(tree_t tree) {
+    return chance_limiter(1 - tree.humidity * 0.01);
+}
+
 double distance_given_coord(int a, int b) {
     return sqrt(pow(a, 2) + pow(b, 2));
 }
