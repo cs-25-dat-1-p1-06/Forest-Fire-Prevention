@@ -207,48 +207,11 @@ void user_dead_zone(forest_t forest, int size_of_dead_zone, int x, int y) {
     for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
         change_tree(forest, empty, j + x, size_of_dead_zone + y);
         change_tree(forest, empty, j + x, -size_of_dead_zone + y);
-    }
-    for (int i = -size_of_dead_zone; i <= size_of_dead_zone; i++) {
-        change_tree(forest, empty, size_of_dead_zone + x, i + y);
-        change_tree(forest, empty, -size_of_dead_zone + x, i + y);
-    }
-    //
-    // if (size_of_dead_zone + x < forest.width && x - size_of_dead_zone >= 0){
-    //     for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
-    //         get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
-    //         get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
-    //         get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
-    //         get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
-    //     }
-    // }
-    // //Hvis dead-zone kommer udenfor forest, skal det selvfølgelig ikke bløde over i de andre linjer.
-    // /* Først hvis x - size_of_dead_zone er under 0, skal den venstre linje ikke inkluderes
-    //  * De vandrette linjer skal kun printes hvis x + j er over 0. Men den højre linje skal printes uanset hvad.
-    //  */
-    // else if (x - size_of_dead_zone < 0) {
-    //     for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
-    //
-    //         if (x + j >= 0) {
-    //             get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
-    //             get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
-    //         }
-    //             get_tree(forest, x+size_of_dead_zone, y+j)->status = empty;
-    //
-    //     }
-    // }
-    // else if (x + size_of_dead_zone >= forest.width) {
-    //     for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
-    //         if (x + j < forest.width) {
-    //             get_tree(forest, x+j, y-size_of_dead_zone)->status = empty;
-    //             get_tree(forest, x+j, y+size_of_dead_zone)->status = empty;
-    //         }
-    //             get_tree(forest, x-size_of_dead_zone, y+j)->status = empty;
-    //
-    //     }
-    // }
 
+        change_tree(forest, empty, size_of_dead_zone + x, j + y);
+        change_tree(forest, empty, -size_of_dead_zone + x, j + y);
+    }
 }
-
 
 
 int get_trees_amount(forest_t forest, status_e target) {
@@ -351,9 +314,7 @@ void tick(forest_t forest)
     //Vi scanner for hvilke træer der skal brænde
     int* trees_to_burn = scan_forest_spread(forest);
     //Hvis dette array ikke er en NULL pointer, fortsætter vi
-
     spread(forest, trees_to_burn);
-
 }
 
 void fire_sim(forest_t forest, int* tickCounter, short start_y) {

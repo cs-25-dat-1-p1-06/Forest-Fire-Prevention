@@ -5,16 +5,18 @@
 #include "windows.h"
 #include "fire-sim.h"
 
-//every possible user command
+//alle commands som brugen kan bruge, angivet med virtuelle koder til taster
+//de virtuelle koder til tasterne kan findes her:
+//https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 typedef enum {none = 0x00, pause = 0x20, forest_thinning = 0x46, drop_water = 0x57, dead_zone = 0x44} command_e;
 
-//example struct in case it is useable
+//struct til input, indeholder de nødvendige værdiger for at gemme brugens input
 typedef struct
 {
     int x;
     int y;
-    short start_y;
     command_e command;
+    short start_y;
     int paused;
     forest_t forest;
     pthread_mutex_t* accept_user_input;
@@ -22,37 +24,32 @@ typedef struct
 
 /**
  * loop til brugerens input
- * @param x pointer til x værdien af der hvor brugeren klikker
- * @param y pointer til y værdien af der hvor brugeren klikker
- * @param command pointer til den command som skal gives baseret på tastatur input
+ * @param args pointer til den data som skal sendes til threaden, helst en input_t struct
  * @return NULL når den er færdig
  */
 void* user_input_loop(void* args);
 
 /**
  * tager brugerens input fra mus eller tastatur
- * @param x pointer til x værdien af der hvor brugeren klikker
- * @param y pointer til y værdien af der hvor brugeren klikker
- * @param command pointer til den command som skal gives baseret på tastatur input
+ * @param input struct til input
+ * @param hStdin input buffer handle
  */
-void user_input(input_t* input);
+void user_input(input_t* input, HANDLE hStdin);
 
 /**
- * tjekker hvor brugeren klikker
+ * assigner værdi til x og y baseret på hvor brugeren klikker i konsollen
  * @param mer muse event
  * @param x pointer til x værdien af der hvor brugeren klikker
  * @param y pointer til y værdien af der hvor brugeren klikker
- * @return 0 hvis brugeren ikke klikker (uønskede input). 1 hvis brugeren klikker et sted i konsollen
  */
-int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, int start_y);
+void MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, int start_y);
 
 /**
- * tjekker hvilken tast der bliver trykket
+ * assigner værdi til kommand baseret på tastatur input
  * @param ker tastatur event
  * @param command pointer til den command som skal gives baseret på tastatur input
- * @return 0 hvis der ikke blev trykket på en tast (uønskede input). 1 hvis der blev trykket på en tast
  */
-int KeyEventProc(KEY_EVENT_RECORD ker, command_e *command);
+void KeyEventProc(KEY_EVENT_RECORD ker, command_e *command);
 
 /**
  * tillader brugeren at indtaste størrelse og tæthed af skoven
