@@ -4,13 +4,16 @@
 #include <wind.h>
   
 #define RATE_OF_BURN 0.2
-#define MAX_HEAT 0.2
+#define MAX_HEAT 1
 #define SPREAD_RANGE 2.3
 #define USER_DEAD_ZONE_SIZE 3
 #define USER_SPLASH_ZONE_SIZE 2
 #define WET_TREE_HUMIDITY 100
 #define TREE_FUEL 1.0
-#define STARTING_HUMIDITY 10
+#define STARTING_HUMIDITY 30
+#define HEAT_FACTOR 1
+#define WIND_FACTOR 1
+
 
 
 typedef enum {empty, fresh, burning, burnt, wet} status_e;
@@ -126,7 +129,7 @@ void tick(forest_t forest);
  * @param forest Skoven
  * @param start_y Hvor konsollens cursor var, efter brugeren indtaster data
  */
-void fire_sim(forest_t forest, int* tickCounter, short start_y);
+void fire_sim(forest_t forest, int* tickCounter);
 
 /**
  * Checker hvilke træer der brænder, og sænker fuel_left med en fast værdi.

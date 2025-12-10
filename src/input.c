@@ -38,7 +38,6 @@ void* user_input_loop(void* args)
     //hvis accept_user_input er en ulåst mutex stoppes loopet
     while (pthread_mutex_trylock(input->accept_user_input) == EBUSY)
     {
-        input->y = -MAX_HEIGHT;
         //kode loop til bruger input
         user_input(input, hStdin);
 
@@ -58,6 +57,7 @@ void* user_input_loop(void* args)
             user_dead_zone(input->forest, USER_DEAD_ZONE_SIZE, input->x, input->y);
             break;
         }
+        input->y = -MAX_HEIGHT;
     }
     //gendanner input mode inden slut
     SetConsoleMode(hStdin, fdwSaveOldMode);
@@ -94,7 +94,7 @@ void user_input(input_t* input, HANDLE hStdin)
 }
 
 //kode der skal køres når brugeren klikker et sted i konsollen
-void MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, int start_y)
+void MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, short start_y)
 {
     if (mer.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED) //hvis brugeren trykker på venstre muse knap
     {

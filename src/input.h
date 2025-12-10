@@ -42,7 +42,7 @@ void user_input(input_t* input, HANDLE hStdin);
  * @param x pointer til x værdien af der hvor brugeren klikker
  * @param y pointer til y værdien af der hvor brugeren klikker
  */
-void MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, int start_y);
+void MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, short start_y);
 
 /**
  * assigner værdi til kommand baseret på tastatur input

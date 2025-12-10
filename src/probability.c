@@ -6,9 +6,7 @@
 
 int random_chance(double chance)
 {
-    if (chance <= 0 || chance >= 1)
-        return (int)chance_limiter(chance);
-    return (double)(rand() % 101) / 100 <= chance;
+    return (double)(rand() % 100 + 1) / 100 <= chance;
 }
 
 double chance_limiter(double chance)
@@ -17,12 +15,11 @@ double chance_limiter(double chance)
     chance = 1 < chance ? 1 : chance;
     return chance;
 }
-double heat_from_distance(double heat, double distance){
-    return heat / pow(distance, 2);
+
+double heat_prob(double heat, double distance) {
+    return chance_limiter(heat / pow(distance, 2));
 }
-double heat_prob(double heat) {
-    return chance_limiter(1 - heat);
-}
+
 double wind_prob(vector_t wind, vector_t position) {
     double angle = acos(dot_product_vectors(wind, position));
     //apart er en værdi mellem 0 og 1 som kommer tættere på 1 jo større vinklen mellem de to vektorer er, og når maksimum ved v = pi rad
@@ -41,11 +38,11 @@ double wind_prob(vector_t wind, vector_t position) {
     //en basis værdi for sandsynligheden, jo lavere vindens hastighed er, jo mere nærmes denne værdi
     // probability += 0.5;
 
-    return chance_limiter(1 - probability);
+    return chance_limiter(probability);
 }
 
-double humidity_prob(tree_t tree) {
-    return chance_limiter(1 - tree.humidity * 0.01);
+double humidity_not_prob(tree_t tree) {
+    return tree.humidity * 0.01;
 }
 
 double distance_given_coord(int a, int b) {
