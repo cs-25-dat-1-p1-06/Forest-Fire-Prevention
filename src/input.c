@@ -16,12 +16,31 @@ void* user_input_loop(void* args)
 {
     input_t* input = args;
 
+    DWORD fdwSaveOldMode, fdwMode;
+    HANDLE hStdin;
+
+    //får standard input handle
+    hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    if (hStdin == INVALID_HANDLE_VALUE)
+        exit(EXIT_FAILURE);
+
+    //gemmer den nuværende input mode så den kan gendannes inden slut
+    if (! GetConsoleMode(hStdin, &fdwSaveOldMode) )
+        exit(EXIT_FAILURE);
+
+    //aktiverer vindue og muse input events
+    //deaktiverer quick edit mode da dette skaber problemer med at modtage muse inputs.
+    fdwMode = (ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE;
+    if (! SetConsoleMode(hStdin, fdwMode) )
+        exit(EXIT_FAILURE);
+
+
     //hvis accept_user_input er en ulåst mutex stoppes loopet
     while (pthread_mutex_trylock(input->accept_user_input) == EBUSY)
     {
         input->y = -MAX_HEIGHT;
         //kode loop til bruger input
-        user_input(input);
+        user_input(input, hStdin);
 
         switch (input->command)
         {
@@ -40,34 +59,17 @@ void* user_input_loop(void* args)
             break;
         }
     }
+    //gendanner input mode inden slut
+    SetConsoleMode(hStdin, fdwSaveOldMode);
     return NULL;
 }
 
 //modificeret version af kode fra
 //https://learn.microsoft.com/en-us/windows/console/reading-input-buffer-events
-void user_input(input_t* input)
+void user_input(input_t* input, HANDLE hStdin)
 {
-    DWORD fdwSaveOldMode;
-    HANDLE hStdin;
-
-    DWORD cNumRead, fdwMode;
+    DWORD cNumRead;
     INPUT_RECORD irInBuf[128];
-
-    //får standard input handle
-    hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    if (hStdin == INVALID_HANDLE_VALUE)
-        exit(EXIT_FAILURE);
-
-    //gemmer den nuværende input mode så den kan gendannes inden slut
-    if (! GetConsoleMode(hStdin, &fdwSaveOldMode) )
-        exit(EXIT_FAILURE);
-
-    //aktiverer vindue og muse input events
-    //deaktiverer quick edit mode da dette skaber problemer med at modtage muse inputs.
-    fdwMode = (ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE;
-    if (! SetConsoleMode(hStdin, fdwMode) )
-        exit(EXIT_FAILURE);
-
 
     if (! ReadConsoleInput(
             hStdin,      // input buffer handle
@@ -76,47 +78,38 @@ void user_input(input_t* input)
             &cNumRead) ) // antallet af input der bliver læst
                 exit(EXIT_FAILURE);
 
-        //deler events ud til en passende funktion
-        for (int i = 0; i < cNumRead; i++)
+    //deler events ud til en passende funktion
+    for (int i = 0; i < cNumRead; i++)
+    {
+        switch(irInBuf[i].EventType)
         {
-            switch(irInBuf[i].EventType)
-            {
-                case KEY_EVENT: //keyboard input
-                    KeyEventProc(irInBuf[i].Event.KeyEvent, &input->command);
-                    break;
-                case MOUSE_EVENT: // mouse input
-                    MouseEventProc(irInBuf[i].Event.MouseEvent, &input->x, &input->y, input->start_y);
-                    break;
-            }
+            case KEY_EVENT: //keyboard input
+                KeyEventProc(irInBuf[i].Event.KeyEvent, &input->command);
+                break;
+            case MOUSE_EVENT: // mouse input
+                MouseEventProc(irInBuf[i].Event.MouseEvent, &input->x, &input->y, input->start_y);
+                break;
         }
-
-    //gendanner input mode inden slut
-    SetConsoleMode(hStdin, fdwSaveOldMode);
+    }
 }
 
 //kode der skal køres når brugeren klikker et sted i konsollen
-int MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, int start_y)
+void MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, int start_y)
 {
     if (mer.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED) //hvis brugeren trykker på venstre muse knap
     {
         *x = mer.dwMousePosition.X / 2;
         *y = mer.dwMousePosition.Y - start_y;
-        return 1;
     }
-    return 0;
 }
 
 //kode der skal køres når brugeren trykker på en tast
-//de virtuelle koder til tasterne kan findes her:
-//https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-int KeyEventProc(KEY_EVENT_RECORD ker, command_e *command)
+void KeyEventProc(KEY_EVENT_RECORD ker, command_e *command)
 {
     if (ker.bKeyDown) //hvis en tast bliver trykket
     {
         *command = ker.wVirtualKeyCode;
-        return 1;
     }
-    return 0;
 }
 
 void scan_settings(int* width, int* height, double* density) {

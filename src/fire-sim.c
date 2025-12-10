@@ -207,13 +207,11 @@ void user_dead_zone(forest_t forest, int size_of_dead_zone, int x, int y) {
     for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
         change_tree(forest, empty, j + x, size_of_dead_zone + y);
         change_tree(forest, empty, j + x, -size_of_dead_zone + y);
-    }
-    for (int i = -size_of_dead_zone; i <= size_of_dead_zone; i++) {
-        change_tree(forest, empty, size_of_dead_zone + x, i + y);
-        change_tree(forest, empty, -size_of_dead_zone + x, i + y);
+
+        change_tree(forest, empty, size_of_dead_zone + x, j + y);
+        change_tree(forest, empty, -size_of_dead_zone + x, j + y);
     }
 }
-
 
 
 int get_trees_amount(forest_t forest, status_e target) {
@@ -315,9 +313,7 @@ void tick(forest_t forest)
     //Vi scanner for hvilke træer der skal brænde
     int* trees_to_burn = scan_forest_spread(forest);
     //Hvis dette array ikke er en NULL pointer, fortsætter vi
-
     spread(forest, trees_to_burn);
-
 }
 
 void fire_sim(forest_t forest, int* tickCounter, short start_y) {
