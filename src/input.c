@@ -15,6 +15,7 @@
 void* user_input_loop(void* args)
 {
     input_t* input = args;
+    command_e old_input;
 
     DWORD fdwSaveOldMode, fdwMode;
     HANDLE hStdin;
@@ -38,6 +39,7 @@ void* user_input_loop(void* args)
     //hvis accept_user_input er en ulåst mutex stoppes loopet
     while (pthread_mutex_trylock(input->accept_user_input) == EBUSY)
     {
+        old_input = input->command;
         //kode loop til bruger input
         user_input(input, hStdin);
 
@@ -45,10 +47,10 @@ void* user_input_loop(void* args)
         {
         case pause:
             input->paused = !input->paused; //omvender paused så 0 bliver til 1 og 1 bliver til 0
-            input->command = none;
+            input->command = old_input;
             break;
         case forest_thinning:
-            change_tree(input->forest, empty, input->x, input->y);
+            change_tree_at_coords(input->forest, empty, input->x, input->y);
             break;
         case drop_water:
             user_drop_water(input->forest, USER_SPLASH_ZONE_SIZE, input->x, input->y);
