@@ -31,7 +31,7 @@ forest_t make_rnd_forest(double density, int width, int height, vector_t wind) {
             rnd_forest.trees[i].status = fresh;
             rnd_forest.trees[i].fuel_left = TREE_FUEL;
             rnd_forest.trees[i].heat = 0;
-            rnd_forest.trees[i].humidity = 1;
+            rnd_forest.trees[i].humidity = STARTING_HUMIDITY;
         }
         else {
             rnd_forest.trees[i].status = empty;
@@ -128,7 +128,7 @@ void destroy_tree(tree_t* tree_to_destroy)
 void create_tree(tree_t* tree_to_create)
 {
     tree_to_create->status = fresh;
-    tree_to_create->humidity = 1;
+    tree_to_create->humidity = STARTING_HUMIDITY;
     tree_to_create->heat = 0;
     tree_to_create->fuel_left = TREE_FUEL;
 }
@@ -139,8 +139,8 @@ void burn_tree(tree_t* tree_to_burn)
     {
         tree_to_burn->status = burning;
         tree_to_burn->humidity = 0;
-        tree_to_burn->heat = SPREAD_HEAT;
         tree_to_burn->fuel_left = TREE_FUEL;
+        heat_by_fuel_left(tree_to_burn);
     }
 }
 
@@ -169,7 +169,7 @@ void start_fire(forest_t forest, int x, int y) {
     if (check_bounds(forest, x, y)) {
         tree_t* tree_to_burn = get_tree(forest, x, y);
         burn_tree(tree_to_burn);
-        tree_to_burn->heat = STARTING_HEAT;
+        tree_to_burn->heat = MAX_HEAT;
     }
     //"Hvorfor fanden har du startet en brand, er du fuldstændig vanvittig?!"
 }
@@ -181,18 +181,18 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
         for (int j = -(int)SPREAD_RANGE; j <= SPREAD_RANGE; j++) {
             if (check_bounds(forest, x + j, y + i)) { //hvis både x- og y-værdien er indenfor arrayet
                 tree_t* tree = get_tree(forest, x + j, y + i);
-
                 vector_t distance = new_vector(-j, i);
+
                 if (tree->status == burning && distance.length <= SPREAD_RANGE) {
                     //Vi bestemmer heat ift. afstanden. Svagere jo længere væk træet er.
-                    double heat_by_dist = heat_from_distance(*tree, distance.length);
+                    double heat_by_dist = heat_from_distance(tree->heat, distance.length);
                     not_fire_prob *= heat_prob(heat_by_dist);
                     not_fire_prob *= wind_prob(forest.wind, distance);
                 }
             }
         }
     }
-    return 1 - not_fire_prob;
+    return humidity_prob(*get_tree(forest, x, y)) * (1 - not_fire_prob);
 }
 
 void user_drop_water(forest_t forest, int size_of_splash, int x, int y) {
@@ -238,6 +238,8 @@ void burndown(forest_t forest) {
 
             if (tree->status == burning) {
                 tree->fuel_left -= RATE_OF_BURN;
+                heat_by_fuel_left(tree);
+
             }
             //Hvis brændstof er 0, ændres status til burnt.
             if (tree->fuel_left <= 0) {
@@ -248,8 +250,7 @@ void burndown(forest_t forest) {
 }
 
 
-int sim_finished_check(forest_t forest)
-{
+int sim_finished_check(forest_t forest) {
     int counter = get_trees_amount(forest, burning);
     if (counter > 0) {
         return 0;
@@ -261,9 +262,8 @@ void spread(forest_t forest, int* trees_to_burn) {
     if (trees_to_burn != NULL)
     {
         for (int i = 0; i < forest.size; i++) {
-            if (&trees_to_burn[i] == NULL || trees_to_burn[i] == -1) {
-                continue;
-            }
+            if (&trees_to_burn[i] == NULL || trees_to_burn[i] == -1) continue;
+
             int x = trees_to_burn[i] % forest.width;
             int y = trees_to_burn[i] / forest.width;
             change_tree(forest, burning, x, y);
@@ -347,11 +347,10 @@ void fire_sim(forest_t forest, int* tickCounter, short start_y) {
 
         //Vi checker om simulationen er færdig
     } while (!sim_finished_check(forest));
-
+    printf("Sim is finished!\n");
+    
     pthread_mutex_unlock(&accept_user_input);
     pthread_join(input_thread, NULL);
-
-    printf("Sim is finished!\n");
 }
 
 void status_text(forest_t forest, int tickCount) {

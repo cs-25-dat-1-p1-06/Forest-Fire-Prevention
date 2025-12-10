@@ -17,8 +17,8 @@ double chance_limiter(double chance)
     chance = 1 < chance ? 1 : chance;
     return chance;
 }
-double heat_from_distance(tree_t tree, double distance){
-    return heat_by_fuel_left(tree) / (pow(distance, 2) * 2);
+double heat_from_distance(double heat, double distance){
+    return heat / pow(distance, 2);
 }
 double heat_prob(double heat) {
     return chance_limiter(1 - heat);
@@ -44,19 +44,22 @@ double wind_prob(vector_t wind, vector_t position) {
     return chance_limiter(1 - probability);
 }
 
+double humidity_prob(tree_t tree) {
+    return chance_limiter(1 - tree.humidity * 0.01);
+}
+
 double distance_given_coord(int a, int b) {
     return sqrt(pow(a, 2) + pow(b, 2));
 }
 
-double heat_by_fuel_left(tree_t tree) {
-    if (tree.status != burning) return 0;
-
-    double my = TREE_FUEL/2;
-    double x = tree.fuel_left;
-    double sigma = 0.2;
-    double heat = 1;
-    heat *= 1 / sqrt(2 * M_PI * pow(sigma,2));
-    heat *= pow(M_E,- pow(x - my,2) / 2 * pow(sigma,2));
-    heat *= HEAT_FACTOR;
-    return heat;
+void heat_by_fuel_left(tree_t* tree) {
+    if (tree->status != burning) tree->heat = 0;
+    //Vi bruger formlen for en parabel med et variabelt toppunkt.
+    double x = tree->fuel_left;
+    int c = 0;
+    double top_x = TREE_FUEL/2;
+    double top_y = MAX_HEAT;
+    double b = -((c - top_y ) * 4) / 2 * top_x;
+    double a = -b / 2 * top_x;
+    tree->heat = a * pow(x,2) + b * x + c;
 }
