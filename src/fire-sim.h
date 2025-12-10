@@ -10,7 +10,7 @@
 #define USER_SPLASH_ZONE_SIZE 2
 #define WET_TREE_HUMIDITY 100
 #define TREE_FUEL 1.0
-#define STARTING_HUMIDITY 10
+#define STARTING_HUMIDITY 30
 
 
 typedef enum {empty, fresh, burning, burnt, wet} status_e;

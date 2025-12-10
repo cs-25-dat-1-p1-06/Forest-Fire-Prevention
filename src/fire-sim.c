@@ -239,7 +239,6 @@ void burndown(forest_t forest) {
             if (tree->status == burning) {
                 tree->fuel_left -= RATE_OF_BURN;
                 heat_by_fuel_left(tree);
-
             }
             //Hvis brændstof er 0, ændres status til burnt.
             if (tree->fuel_left <= 0) {
@@ -321,8 +320,6 @@ void fire_sim(forest_t forest, int* tickCounter, short start_y) {
     pthread_mutex_t accept_user_input;
     pthread_mutex_init(&accept_user_input, NULL);
     pthread_mutex_lock(&accept_user_input);
-
-
 
     input_t user_input = {0, 0, start_y, 0, 1, forest, &accept_user_input};
 
