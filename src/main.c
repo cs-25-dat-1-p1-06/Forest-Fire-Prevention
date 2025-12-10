@@ -33,13 +33,9 @@ int main(void) {
 
     start_fire(forest, fire_start_x, fire_start_y);
 
-    CONSOLE_SCREEN_BUFFER_INFO start_buffer;
-    GetConsoleScreenBufferInfo(hConsole, &start_buffer);
-    COORD start_coord = start_buffer.dwCursorPosition;
-
 
     int tickCounter = 0;
-    fire_sim(forest, &tickCounter, start_coord.Y);
+    fire_sim(forest, &tickCounter);
 
 
     //Output file

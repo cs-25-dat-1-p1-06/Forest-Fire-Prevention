@@ -61,23 +61,31 @@ void print_tree(tree_t tree)
 {
     switch (tree.status) {
         case empty:
-            color_change(BLACK);
+            // color_change(BLACK);
+        printf("%s%s", "\033[48;2;0;0;0m", TREE_REP);
+
             break;
         case fresh:
-            color_change(GREEN);
+        printf("%s%s", "\033[48;2;0;255;0m", TREE_REP);
+
             break;
         case burning:
-            color_change(RED);
+            // color_change(RED);
+        printf("%s%s", "\033[48;2;255;0;0m", TREE_REP);
+
             break;
         case burnt:
-            color_change(GREY);
+            // color_change(GREY);
+        printf("%s%s", "\033[48;2;0;255;0m", TREE_REP);
+
             break;
         case wet:
-            color_change(BLUE);
+            // color_change(BLUE);
+    printf("%s%s", "ESC [ <n>", TREE_REP);
+
             break;
     }
     //Printer et tomrum på størrelse med et træ.
-    printf("%s",TREE_REP);
 }
 
 tree_t* get_tree(forest_t forest, int x, int y) {
@@ -185,14 +193,13 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
 
                 if (tree->status == burning && distance.length <= SPREAD_RANGE) {
                     //Vi bestemmer heat ift. afstanden. Svagere jo længere væk træet er.
-                    double heat_by_dist = heat_from_distance(tree->heat, distance.length);
-                    not_fire_prob *= heat_prob(heat_by_dist);
-                    not_fire_prob *= wind_prob(forest.wind, distance);
+                    not_fire_prob *= 1 - heat_prob(tree->heat, distance.length) * HEAT_FACTOR;
+                    not_fire_prob *= 1 - wind_prob(forest.wind, distance) * WIND_FACTOR;
                 }
             }
         }
     }
-    return humidity_prob(*get_tree(forest, x, y)) * (1 - not_fire_prob);
+    return (1 - not_fire_prob) * (1 - humidity_not_prob(*get_tree(forest, x, y)));
 }
 
 void user_drop_water(forest_t forest, int size_of_splash, int x, int y) {
@@ -316,17 +323,22 @@ void tick(forest_t forest)
     spread(forest, trees_to_burn);
 }
 
-void fire_sim(forest_t forest, int* tickCounter, short start_y) {
+void fire_sim(forest_t forest, int* tickCounter) {
     pthread_mutex_t accept_user_input;
     pthread_mutex_init(&accept_user_input, NULL);
     pthread_mutex_lock(&accept_user_input);
 
-    input_t user_input = {0, 0, start_y, 0, 1, forest, &accept_user_input};
-
+    CONSOLE_SCREEN_BUFFER_INFO output_buffer;
+    GetConsoleScreenBufferInfo(hConsole, &output_buffer);
+    COORD start_coord = output_buffer.dwCursorPosition;
+    input_t user_input = {0, 0, none, start_coord.Y, 1, forest, &accept_user_input};
 
     pthread_t input_thread;
-    pthread_create(&input_thread, NULL, user_input_loop, &user_input);
-
+    // pthread_create(&input_thread, NULL, user_input_loop, &user_input);
+    DWORD current_dwMode;
+    GetConsoleMode(hConsole, &current_dwMode);
+    current_dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hConsole, current_dwMode);
 
     do {
         if (!user_input.paused)
@@ -335,7 +347,7 @@ void fire_sim(forest_t forest, int* tickCounter, short start_y) {
             (*tickCounter)++;
         }
 
-        print_forest(forest, start_y);
+        print_forest(forest, start_coord.Y);
 
         status_text(forest,*tickCounter);
 
@@ -347,7 +359,7 @@ void fire_sim(forest_t forest, int* tickCounter, short start_y) {
     printf("Sim is finished!\n");
     
     pthread_mutex_unlock(&accept_user_input);
-    pthread_join(input_thread, NULL);
+    // pthread_join(input_thread, NULL);
 }
 
 void status_text(forest_t forest, int tickCount) {
