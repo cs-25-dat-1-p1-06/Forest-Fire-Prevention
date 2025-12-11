@@ -11,7 +11,7 @@
 #define WET_TREE_HUMIDITY 100
 #define TREE_FUEL 1.0
 #define STARTING_HUMIDITY 30
-#define HEAT_FACTOR 1
+#define HEAT_FACTOR 0.1
 #define WIND_FACTOR 1
 
 
@@ -36,6 +36,9 @@ typedef struct
  */
 forest_t make_rnd_forest(double density, int width, int height, vector_t wind);
 
+char* colored_tree_string(tree_t tree);
+
+
 /**
  * Funktion der printer skoven som farver i konsollen baseret på hvert træs status
  * @param forest Træernes array: Skoven.
@@ -45,8 +48,8 @@ void print_forest(forest_t forest, short start_y);
 
 void print_tree(tree_t tree);
 
-
-void change_tree(forest_t forest, status_e new_status, int x, int y);
+void change_tree_at_coords(forest_t forest, status_e new_status, int x, int y);
+void change_tree(tree_t* tree_to_change, status_e new_status);
 void destroy_tree(tree_t* tree_to_destroy);
 void create_tree(tree_t* tree_to_create);
 void burn_tree(tree_t* tree_to_burn);
@@ -146,7 +149,7 @@ void burndown(forest_t forest);
  * @param forest Skovens tilstand
  * @param trees_to_burn Et array af alle træer som skal sættes ændres til at brænde
  */
-void spread(forest_t forest, int* trees_to_burn);
+void spread(forest_t forest);
 
 /**
  * Funktion der givet en skov checker vha. andre funktioner hvilke træer,
