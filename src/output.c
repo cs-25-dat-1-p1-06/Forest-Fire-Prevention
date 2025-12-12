@@ -38,7 +38,7 @@ void write_output(forest_t forest, int tickCount, int width, int height, double 
     cJSON_ReplaceItemInObject(root, "logs", cJSON_CreateNumber(logCount));
 
     //Opret ny log
-    char logName[16];
+    char logName[32];
     sprintf(logName, "log%d", logCount);
 
     cJSON *logObj = cJSON_CreateObject();
