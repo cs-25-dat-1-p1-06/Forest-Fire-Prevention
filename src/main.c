@@ -1,9 +1,7 @@
 #include "fire-sim.h"
 #include "input.h"
 #include "console.h"
-#include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <time.h>
 #include <output.c>
 
