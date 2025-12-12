@@ -2,14 +2,14 @@
 #include "fire-sim.h"
 #include "input.h"
 #include "console.h"
-#include "stdio.h"
+#include "wind.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 int main(void) {
     srand(time(NULL));
 
-    //læs width, height density
     FILE *fp = fopen("./logs/output.json","r");
     cJSON *root = NULL;
 
@@ -33,25 +33,36 @@ int main(void) {
         printf("No logs found!");
         exit(EXIT_FAILURE);
     }
+
+    //Select log
     cJSON *logsItem = cJSON_GetObjectItem(root, "logs");
     int logCount = logsItem->valueint;
-    printf("Found %d logs. Select a log between 1-%d:\n", logCount,logCount);
-
-    //select log
     int selectedLog;
-    scanf("%d",&selectedLog);
-    char logName[16];
+
+    //Input validation
+    do {
+        printf("Found %d logs. Select a log between 1-%d:\n", logCount,logCount);
+        //Tjekker om input er en int
+        if (scanf("%d", &selectedLog) != 1) {
+            printf("Invalid input. Please enter an integer.\n");
+            // Clear input buffer for at undgå inf loop
+            while (getchar() != '\n');
+        }
+    } while (selectedLog < 1 || selectedLog > logCount); // Scan indtil inputtet er i logcount range.
+
+    char logName[32];
     sprintf(logName, "log%d",selectedLog);
-    cJSON *logItem = cJSON_GetObjectItem(root, logName);
+    cJSON *logItem = cJSON_GetObjectItem(root, logName); //indlæst log
 
-    cJSON* width = NULL;
-    cJSON* height = NULL;
-    cJSON* density = NULL;
+    cJSON * settingsItem = cJSON_GetArrayItem(logItem, 0); //index 0 for settings objekt
+    cJSON* width = cJSON_GetObjectItem(settingsItem, "width");
+    cJSON* height = cJSON_GetObjectItem(settingsItem, "height");
+    cJSON* density = cJSON_GetObjectItem(settingsItem, "density");
 
-    cJSON * subitem = cJSON_GetArrayItem(logItem, 0); //settings object
-    width = cJSON_GetObjectItem(subitem, "width");
-    height = cJSON_GetObjectItem(subitem, "height");
-    density = cJSON_GetObjectItem(subitem, "density");
+    cJSON* windItem = cJSON_GetArrayItem(logItem,1); //index 1 for wind objekt
+    cJSON* speed = cJSON_GetObjectItem(windItem,"speed");
+    cJSON* x = cJSON_GetObjectItem(windItem,"x");
+    cJSON* y = cJSON_GetObjectItem(windItem,"y");
 
     printf("%s: height: %d, width: %d, density: %.2lf\n", logName,height->valueint,width->valueint,density->valuedouble);
     printf("To access different modes use the following keys:\n");
@@ -62,8 +73,9 @@ int main(void) {
 
     console_setup();
 
-    //Initiliasere vind
-    vector_t wind = rnd_wind();
+    //Initiliasere vind fra json
+    vector_t wind = new_vector(x->valuedouble,y->valuedouble);
+    wind.length = speed->valuedouble;
 
     forest_t forest = make_rnd_forest(density->valuedouble, width->valueint, height->valueint, wind);
 
@@ -84,7 +96,7 @@ int main(void) {
     fire_sim(forest, &tickCounter);
 
     free(forest.trees);
-    //
+
     system("pause");
 
     return 0;

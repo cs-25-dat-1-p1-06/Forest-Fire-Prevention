@@ -1,9 +1,10 @@
 #include <../external/cJSON.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <wind.h>
 #include <fire-sim.h>
 
-void write_output(forest_t forest, int tickCount, int width, int height, double density) {
+void write_output(forest_t forest, int tickCount, int width, int height, double density, vector_t wind) {
 
     //Læser indhold i log fil
     FILE *fp = fopen("./logs/output.json", "r");
@@ -50,6 +51,13 @@ void write_output(forest_t forest, int tickCount, int width, int height, double 
     cJSON_AddNumberToObject(settings, "height", height);
     cJSON_AddNumberToObject(settings, "density", density);
     cJSON_AddItemToObject(logObj, "settings", settings);
+
+    //Wind
+    cJSON *windObj = cJSON_CreateObject();
+    cJSON_AddNumberToObject(windObj, "speed", wind.length);
+    cJSON_AddNumberToObject(windObj, "x", wind.x);
+    cJSON_AddNumberToObject(windObj, "y", wind.y);
+    cJSON_AddItemToObject(logObj,"wind",windObj);
 
     //Results
     cJSON *results = cJSON_CreateObject();
