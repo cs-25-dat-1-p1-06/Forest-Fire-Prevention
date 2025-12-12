@@ -64,12 +64,12 @@ int main(void) {
     cJSON* x = cJSON_GetObjectItem(windItem,"x");
     cJSON* y = cJSON_GetObjectItem(windItem,"y");
 
-    printf("%s: height: %d, width: %d, density: %.2lf\n", logName,height->valueint,width->valueint,density->valuedouble);
     printf("To access different modes use the following keys:\n");
     printf("Forest Thinning: 'F'\n");
     printf("Water Drop: 'W'\n");
     printf("Dead Zone (size of 3): 'D'\n");
     printf("Pause: 'Space'\n");
+    printf("%s: height: %d, width: %d, density: %.2lf\n", logName,height->valueint,width->valueint,density->valuedouble);
 
     console_setup();
 
