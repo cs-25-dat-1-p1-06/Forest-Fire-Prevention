@@ -1,9 +1,7 @@
 #include "fire-sim.h"
 #include "input.h"
 #include "console.h"
-#include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <time.h>
 #include <output.c>
 
@@ -39,7 +37,7 @@ int main(void) {
 
 
     //Output file
-    write_output(forest,tickCounter,width,height,density);
+    write_output(forest,tickCounter,width,height,density,wind);
     free(forest.trees);
 
     system("pause");
