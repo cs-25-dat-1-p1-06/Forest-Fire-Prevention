@@ -37,7 +37,7 @@ int main(void) {
 
 
     //Output file
-    write_output(forest,tickCounter,width,height,density);
+    write_output(forest,tickCounter,width,height,density,wind);
     free(forest.trees);
 
     system("pause");
