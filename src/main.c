@@ -7,20 +7,19 @@
 
 int main(void) {
     srand(time(NULL));
-    // printf("%f", chance_limiter(wind_prob()));
     int width, height;
     double density;
     scan_settings(&width, &height, &density);
 
     console_setup();
 
-    //Initiliasere vind
+    //Initialiserer tilfældig vind
     vector_t wind = rnd_wind();
 
+    //Initialiserer en tilfældig skov
     forest_t forest = make_rnd_forest(density, width, height, wind);
 
-
-
+    //finder et tilfældigt sted i skoven at starte branden
     int fire_start_x, fire_start_y;
     do
     {
@@ -31,15 +30,16 @@ int main(void) {
 
     start_fire(forest, fire_start_x, fire_start_y);
 
-
+    //kører simulationen
     int tickCounter = 0;
     fire_sim(forest, &tickCounter);
 
 
-    //Output file
+    //Skriver en log til output filen
     write_output(forest,tickCounter,width,height,density,wind);
     free(forest.trees);
 
+    //pauser programmet så brugeren kan se simulationens resultat da programmet ellers bare ville lukke ned
     system("pause");
     return 0;
 }

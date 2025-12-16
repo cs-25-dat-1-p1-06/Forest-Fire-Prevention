@@ -10,21 +10,21 @@
 #include "input.h"
 
 //farver angivet i rgb
-#define BLUE "0;0;200"
-#define GREEN "0;200;0"
 #define RED "200;0;0"
+#define GREEN "0;200;0"
+#define BLUE "0;0;200"
 #define GREY "100;100;100"
 #define BLACK "0;0;0"
 #define TREE_REP "  "
-#define MAX_SIZE_OF_COLOR 18 //længden på den længste SGR farve kode streng: "38;2;xxx;xxx;xxxm\0"
 
-
+//længden på den længste SGR farve kode streng: "48;2;xxx;xxx;xxxm\0"
+#define MAX_SIZE_OF_COLOR 18
 
 
 forest_t make_rnd_forest(double density, int width, int height, vector_t wind) {
-
     tree_t* trees = malloc(sizeof(tree_t) * width * height);
     forest_t rnd_forest = {trees, width, height, width * height, wind};
+    //sætter træerne i skoven baseret på tætheden
     for (int i = 0; i < width * height; i++) {
         if (random_chance(density)) {
             change_tree(&rnd_forest.trees[i], fresh);
@@ -36,10 +36,11 @@ forest_t make_rnd_forest(double density, int width, int height, vector_t wind) {
 
     return rnd_forest;
 }
+
 void print_forest(forest_t forest, short start_y) {
     //Vi sætter cursoren i konsollen til at være dér hvor skoven starter, hvorefter vi printer skoven
     SetConsoleCursorPosition(hConsole, (COORD){0, start_y});
-    unsigned long long buffer_size = sizeof(char) * forest.width * forest.height * (MAX_SIZE_OF_COLOR + strlen(TREE_REP)) + 1 * forest.height;
+    int buffer_size = sizeof(char) * forest.width * forest.height * (MAX_SIZE_OF_COLOR + strlen(TREE_REP)) + 1 * forest.height;
     /*
      * ændrer buffer mode til _IOFBF hvilket betyder at der skrives til konsollen i blokke af tekst på størrelse af bufferen fra bufferen
      * ændrer størrelsen på bufferen til at være den maksimale mulige antal karakterer som skal være inkluderet
@@ -58,9 +59,9 @@ void print_forest(forest_t forest, short start_y) {
 }
 
 void print_tree(tree_t tree)
-{ //Vi starter med at initialisere color som en string, med starten på en farvekode.
+{ //Vi starter med at initialisere color som en streng, med starten på farvekoden til extended farver hvilket tillader rgb værdier.
     char color[MAX_SIZE_OF_COLOR] = "\x1b[48;2;";
-    //Alt efter træets status tilføjer vi så resten af farvekoden, vha. strcat funktionen og vores farve-macroer.
+    //tilføjer den ønskede rgb værdi til strengen
     switch (tree.status) {
         case empty:
             strcat(color, BLACK);
@@ -78,14 +79,15 @@ void print_tree(tree_t tree)
             strcat(color, BLUE);
             break;
     }
-    //Afsluttes med m
+    //onsole Virtual Terminal Sequences med farver slutter med m
     strcat(color, "m");
     //Så printes farven, samt TREE_REP tomrummet, så cursoren bevæger sig som den skal.
     printf("%s%s", color, TREE_REP);
 }
 
 tree_t* get_tree(forest_t forest, int x, int y) {
-    //Da y er højden, skal det ganges med bredden og plusses med x for at få det korrekte index
+    //For at få indeks til et træ ud fra x og y
+    //er summen af x og produktet af y og bredden
     return &forest.trees[forest.width * y + x];
 }
 
@@ -96,7 +98,7 @@ int check_bounds(forest_t forest, int x, int y)
 }
 
 void change_tree(tree_t* tree_to_change, status_e new_status) {
-    //switch statement anvendes til at kalde forskellige funktionener ift. forskellig status man vil opnå.
+    //kalder en funktion baseret på den status der ønskes
     switch (new_status) {
         case empty:
             destroy_tree(tree_to_change);
@@ -117,11 +119,11 @@ void change_tree(tree_t* tree_to_change, status_e new_status) {
 }
 
 void change_tree_at_coords(forest_t forest, status_e new_status, int x, int y) {
-    //Hvis koordinaterne er indenfor bounds
+    //Hvis koordinaterne er indenfor skovens grænser
     if (check_bounds(forest, x, y)) {
-        //Vi henter træet
+        //Vi henter træet da vi nu ved at det ikke vil skabe en error
         tree_t* tree_to_change = get_tree(forest, x, y);
-        //Vi kalder chance_tree med den status vi ønsker.
+        //ændrer træet til den status vi ønsker.
         change_tree(tree_to_change, new_status);
     }
 }
@@ -175,10 +177,8 @@ void finish_burn(tree_t* tree_to_burnt)
 }
 void water_tree(tree_t* tree_to_water)
 {
-    /* Hvis træet brænder, antages det, at vandet ville fordampe, og ikke påvirke træet.
-     * Et brændt træ, eller et der ikke findes, ville ikke have gavn af vandet.
-     */
-    if (tree_to_water->status != burning && tree_to_water->status != burnt && tree_to_water->status != empty)
+    // Et brændt træ, eller et der ikke findes, ville ikke have gavn af vandet.
+    if (tree_to_water->status != burnt && tree_to_water->status != empty)
     {
         //Status ændres, varmen sættes til 0, og fugtigheden sættes til WET_TREE_HUMIDITY macroen.
         tree_to_water->status = wet;
@@ -187,8 +187,9 @@ void water_tree(tree_t* tree_to_water)
     }
 }
 
-//Når start er true starter brænden på disse x y koordinater
+
 void start_fire(forest_t forest, int x, int y) {
+    //ændrer træet ved de givne koordinater til at brænde
     change_tree_at_coords(forest, burning, x, y);
 }
 
@@ -202,15 +203,16 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
             if (check_bounds(forest, x + j, y + i)) {
                 //Så finder vi træet og udregner afstanden af vektoren fra det, til vores aktuelle træ.
                 tree_t* tree = get_tree(forest, x + j, y + i);
-                /* For at få den aktuelle vektor husker vi at når y stiger, går vi nedad i skoven,
+                /* Denne vektor peger i retning fra det originale træ og over mod det træ der checkes.
+                 * For at få vektoren der peger på det originale træ
+                 * husker vi at når y stiger, går vi nedad i skoven,
                  * så dens værdi er allerede negativ. Ved også at gøre x negativ har vi den omvendte vektor,
-                 * af den fra vores aktuelle træ til træet sandsynligheden kommer fra,
-                 * ergo fra træet til vores aktuelle træ.
+                 * af den fra vores aktuelle træ til træet sandsynligheden kommer fra.
                  */
                 vector_t distance = new_vector(-j, i);
                 //Tjek om træet brænder, og distancen faktisk er mindre end eller lig med SPREAD_RANGE
                 if (tree->status == burning && distance.length <= SPREAD_RANGE) {
-                    /*Vi finder sandsynligheder for at træet ikke brænder, og ganger dem på for heat og wind,
+                    /* Vi finder sandsynligheder for at træet ikke brænder, og ganger dem på for heat og wind,
                      * samt distance.
                      */
                     not_fire_prob *= 1 - heat_prob(tree->heat, distance.length) * HEAT_FACTOR;
@@ -219,8 +221,8 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
             }
         }
     }
-    /*Vi tager til sidst og medregner det aktuelle træs humidity, før vi returnerer 1 - not_fire_prob,
-     *for at få fire_prob*/
+    /* vi tager den komplementære sandsynlighed for not_fire_prob og ganger den sammen med den
+     * komplementære sandsynlighed for humidity_not_prob*/
     return (1 - not_fire_prob) * (1 - humidity_not_prob(*get_tree(forest, x, y)));
 }
 
@@ -234,6 +236,7 @@ void user_drop_water(forest_t forest, int size_of_splash, int x, int y) {
 }
 
 void user_dead_zone(forest_t forest, int size_of_dead_zone, int x, int y) {
+    //tegner en firkant omkring koordinaterne med sidelængde 2 * size_of_dead_zone + 1 med tomme træer
     for (int j = -size_of_dead_zone; j <= size_of_dead_zone; j++) {
         change_tree_at_coords(forest, empty, j + x, size_of_dead_zone + y);
         change_tree_at_coords(forest, empty, j + x, -size_of_dead_zone + y);
@@ -246,13 +249,22 @@ void user_dead_zone(forest_t forest, int size_of_dead_zone, int x, int y) {
 
 int get_trees_amount(forest_t forest, status_e target) {
     int counter = 0;
-    // Loop igennem alle træer
+    // Loop igennem alle træer og tæller dem af bestemt status
     for (int i = 0; i < forest.size; i++) {
         if (forest.trees[i].status == target) {
             counter++;
         }
     }
     return counter;
+}
+
+void heat_by_fuel_left(tree_t* tree) {
+    //Vi bruger formlen for en parabel med et variabelt toppunkt.
+    double top_x = TREE_FUEL / 2;
+    double top_y = MAX_HEAT;
+    double b = 4 * top_y / (2 * top_x);
+    double a = -b / (2 * top_x);
+    tree->heat = a * pow(tree->fuel_left,2) + b * tree->fuel_left;
 }
 
 void burndown(forest_t forest) {
@@ -275,7 +287,7 @@ void burndown(forest_t forest) {
 
 
 int sim_finished_check(forest_t forest) {
-    //Vi tjekker om nogen træer stadig brænder.
+    //Vi tjekker om der stadig er træer der brænder, hvis ikke returneres 1.
     int counter = get_trees_amount(forest, burning);
     if (counter > 0) {
         return 0;
@@ -289,7 +301,7 @@ void spread(forest_t forest) {
     if (trees_to_burn != NULL)
     {
         for (int i = 0; i < forest.size; i++) {
-            //Hvis trees_to_burn returnerer sandt.
+            //Hvis trees_to_burn for det givne træ returnerer sandt.
             if (trees_to_burn[i])
                 change_tree(&forest.trees[i], burning);
         }
@@ -310,10 +322,11 @@ int* scan_forest_spread(forest_t forest) {
             //Hvis et træ brænder, er brændt eller er tom, skal det selvfølgelig ikke brændes.
             switch (current_tree->status)
             {
+                case wet:
                 case fresh:
                     //Initialisér risiko for at branden starter som procent fra 0 til 100.
                     double risk_of_burning = calculate_fire_prob(forest, j, i);
-                    //Hvis et tilfældigt tal mellem 0 og 99 er under risikoen, så brænder træet. Ellers ikke.
+                    //Hvis et tilfældigt tal mellem 0.01 og 1 er under risikoen, så brænder træet. Ellers ikke.
                     if (random_chance(risk_of_burning)) {
                         trees_to_burn[counter] = 1;
                     }
@@ -331,33 +344,36 @@ int* scan_forest_spread(forest_t forest) {
     }
     return trees_to_burn;
 }
+
+
 void tick(forest_t forest)
 {
-    //Vi vil have at brændende træer mister brændstof, og at ilden spreder sig.
+    //Vi vil have at brændende træer mister brændstof og ændrer heat baseret på dette.
     burndown(forest);
-    //Hvis dette array ikke er en NULL pointer, fortsætter vi.
+    //skovbranden spredes.
     spread(forest);
 }
 
 void fire_sim(forest_t forest, int* tickCounter) {
-    //Vi gør den accept_user_input threaden klar, og sørger for at den er låst indtil programmet er afsluttet.
+    //initialiserer en mutex som skal være låst imens vi modtager input
+    //sørger for at låse den så vi modtager input
     pthread_mutex_t accept_user_input;
     pthread_mutex_init(&accept_user_input, NULL);
     pthread_mutex_lock(&accept_user_input);
 
-    // Vi får output_bufferen
+    // Vi får output_bufferen så vi kan tage cursorens nuværende position, dette bruges til at vide hvor simulationen
+    // starter i konsollen
     CONSOLE_SCREEN_BUFFER_INFO output_buffer;
     GetConsoleScreenBufferInfo(hConsole, &output_buffer);
     COORD start_coord = output_buffer.dwCursorPosition;
+
+    //ny input_t som kan gives til input thread så input thread har det nødvendige data
     input_t user_input = {0, 0, none, start_coord.Y, 1, forest, &accept_user_input};
 
-    pthread_t input_thread;
-    pthread_create(&input_thread, NULL, user_input_loop, &user_input);
 
-    DWORD current_fdwMode;
-    GetConsoleMode(hConsole, &current_fdwMode);
-    current_fdwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(hConsole, current_fdwMode);
+    pthread_t input_thread; //thread id
+    //start thread med user_input_loop som funktion og tildeler user_input som input
+    pthread_create(&input_thread, NULL, user_input_loop, &user_input);
 
     do {
         //Hvis simulationen ikke er på pause.
@@ -367,17 +383,21 @@ void fire_sim(forest_t forest, int* tickCounter) {
             tick(forest);
             (*tickCounter)++;
         }
-        //Vi printer skoven, efterfulgt at statusteksten
+        //Vi printer skoven der hvor simulationen startede hver gang, efterfulgt at statusteksten
         print_forest(forest, start_coord.Y);
         status_text(forest,*tickCounter);
-
-        //Vi beder computeren om at vente 0.4 sekunder (10^5 mikrosekunder * 4) mellem hver iteration
-        usleep((useconds_t)pow(10,5) * 4);
+        //vi venter 0.4 sekunder (4 * 10^5 mikrosekunder) mellem hver tick
+        usleep((useconds_t)4 * pow(10,5));
 
         //Vi checker om simulationen er færdig
     } while (!sim_finished_check(forest));
+    //skoven bliver printet endnu en gang da brugeren kunne lave et input mellem sidste print og sim_finished_check
+    //som ville slutte simulationen
+    print_forest(forest, start_coord.Y);
+    status_text(forest,*tickCounter);
+
     printf("Sim is finished!\n");
-    //Vi låser op for accept_user_input, for at joine dem, så vi kan afslutte ordentligt.
+    //Vi låser op for accept_user_input, for at joine dem (vi venter på at input_thread afslutter), så vi kan deallokere ressourcer ordentligt.
     pthread_mutex_unlock(&accept_user_input);
     pthread_join(input_thread, NULL);
 }
@@ -393,8 +413,8 @@ void status_text(forest_t forest, int tickCount) {
     int burnt_count = get_trees_amount(forest, burnt);
 
     //De printes samt tickCount, som kommer udefra funktionen.
-    printf("%11s: %4d\n", "Fresh trees", fresh_count);
-    printf("%11s: %4d\n", "Burnt trees", burnt_count);
-    printf("%11s: %4d\n", "Tick count", tickCount);
+    printf("Fresh trees: %4d\n", fresh_count);
+    printf("Burnt trees: %4d\n", burnt_count);
+    printf("Tick count: %5d\n", tickCount);
 }
 

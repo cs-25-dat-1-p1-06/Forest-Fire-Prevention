@@ -29,9 +29,9 @@ void* user_input_loop(void* args)
     if (! GetConsoleMode(hStdin, &fdwSaveOldMode) )
         exit(EXIT_FAILURE);
 
-    //aktiverer vindue og muse input events
+    //aktiverer muse input events
     //deaktiverer quick edit mode da dette skaber problemer med at modtage muse inputs.
-    fdwMode = (ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE;
+    fdwMode = (ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE;
     if (! SetConsoleMode(hStdin, fdwMode) )
         exit(EXIT_FAILURE);
 
@@ -39,15 +39,19 @@ void* user_input_loop(void* args)
     //hvis accept_user_input er en ulåst mutex stoppes loopet
     while (pthread_mutex_trylock(input->accept_user_input) == EBUSY)
     {
+        //sætter y til -MAX_HEIGHT for ikke at køre en kommando i øverste venstre hjørne
+        input->y = -MAX_HEIGHT;
+        //brugerens input gemmes
         old_input = input->command;
-        //kode loop til bruger input
+
+        //modtager brugerens input
         user_input(input, hStdin);
 
         switch (input->command)
         {
         case pause:
             input->paused = !input->paused; //omvender paused så 0 bliver til 1 og 1 bliver til 0
-            input->command = old_input;
+            input->command = old_input; //gendanner brugerens gamle input så de ikke skal genvælge f.eks forest thinning
             break;
         case forest_thinning:
             change_tree_at_coords(input->forest, empty, input->x, input->y);
@@ -59,7 +63,6 @@ void* user_input_loop(void* args)
             user_dead_zone(input->forest, USER_DEAD_ZONE_SIZE, input->x, input->y);
             break;
         }
-        input->y = -MAX_HEIGHT;
     }
     //gendanner input mode inden slut
     SetConsoleMode(hStdin, fdwSaveOldMode);
@@ -85,17 +88,17 @@ void user_input(input_t* input, HANDLE hStdin)
     {
         switch(irInBuf[i].EventType)
         {
-            case KEY_EVENT: //keyboard input
+            case KEY_EVENT: //tastatur input
                 KeyEventProc(irInBuf[i].Event.KeyEvent, &input->command);
                 break;
-            case MOUSE_EVENT: // mouse input
+            case MOUSE_EVENT: //muse input
                 MouseEventProc(irInBuf[i].Event.MouseEvent, &input->x, &input->y, input->start_y);
                 break;
         }
     }
 }
 
-//kode der skal køres når brugeren klikker et sted i konsollen
+//kode der skal køres når brugeren laver et muse event
 void MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, short start_y)
 {
     if (mer.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED) //hvis brugeren trykker på venstre muse knap
@@ -105,7 +108,7 @@ void MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, short start_y)
     }
 }
 
-//kode der skal køres når brugeren trykker på en tast
+//kode der skal køres når brugeren laver et tastatur event
 void KeyEventProc(KEY_EVENT_RECORD ker, command_e *command)
 {
     if (ker.bKeyDown) //hvis en tast bliver trykket

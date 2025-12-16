@@ -5,7 +5,6 @@
 #include <fire-sim.h>
 
 void write_output(forest_t forest, int tickCount, int width, int height, double density, vector_t wind) {
-
     //Læser indhold i log fil
     FILE *fp = fopen("./logs/output.json", "r");
     cJSON *root = NULL; //Root objekt der holder alle logs

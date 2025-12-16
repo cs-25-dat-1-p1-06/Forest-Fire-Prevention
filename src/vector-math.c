@@ -4,18 +4,20 @@
 
 vector_t new_vector(double x, double y)
 {
+    //tildeler x og y til vektor
     vector_t vector;
     vector.x = x;
     vector.y = y;
 
-    vector.length = length_of_vector(vector);
+    vector.length = length_of_vector(x, y);
 
+    //returnerer enhedsvektoren
     return scalar_product_vector(vector, 1 / vector.length);
 }
 
-double length_of_vector(vector_t vector)
+double length_of_vector(double x, double y)
 {
-    return sqrt(pow(vector.x, 2) + pow(vector.y, 2));
+    return sqrt(pow(x, 2) + pow(y, 2));
 }
 
 double dot_product_vectors(vector_t v1, vector_t v2)
@@ -34,5 +36,6 @@ vector_t scalar_product_vector(vector_t vector, double factor)
 
 double angle_between_vectors(vector_t v1, vector_t v2)
 {
-    return acos(dot_product_vectors(v1, v2) / length_of_vector(v1) * length_of_vector(v2));
+    //vektorer er defineret som enhedsvektorer, derfor er det ikke nødvendigt at dividere med længden
+    return acos(dot_product_vectors(v1, v2));
 }

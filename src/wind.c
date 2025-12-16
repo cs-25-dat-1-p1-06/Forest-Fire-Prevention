@@ -10,7 +10,9 @@
 
 vector_t rnd_wind() {
     vector_t wind;
-    double x, y, speed;
+    double x, y;
+
+    //laver en tilfældig vind indenfor min speed og max speed
     do
     {
         x = (double)(rand() % (WIND_SPEED_MAX * 100 + 1)) / 100;
@@ -18,16 +20,18 @@ vector_t rnd_wind() {
         wind = new_vector(x, y);
     } while (!(WIND_SPEED_MIN <= wind.length && wind.length <= WIND_SPEED_MAX));
 
+    //50:50 for at vi vender vektoren på x aksen
     if (random_chance(0.5))
     {
         x *= -1;
     }
+    //50:50 for at vi vender vektoren på y aksen
     if (random_chance(0.5))
     {
         y *= -1;
     }
 
-    return new_vector(x, y);
+    return wind;
 }
 
 void print_wind(vector_t wind) {
@@ -49,6 +53,7 @@ void print_wind(vector_t wind) {
 int clockwise_position(vector_t v1, int array_size)
 {
     double direction_index = angle_between_vectors(v1, (vector_t){0, 1});
+    //arbejder altid med den store vinkel
     if (v1.x < 0)
         direction_index = 2 * M_PI - direction_index;
     direction_index = (int)round(direction_index / (M_PI / (array_size / 2))) % array_size;
