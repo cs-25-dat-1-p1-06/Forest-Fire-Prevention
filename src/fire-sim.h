@@ -4,14 +4,14 @@
 #include <wind.h>
   
 #define RATE_OF_BURN 0.2
-#define MAX_HEAT 1.5
-#define SPREAD_RANGE 2.3
+#define MAX_HEAT 0.3
+#define SPREAD_RANGE 5
 #define USER_DEAD_ZONE_SIZE 5
 #define USER_SPLASH_ZONE_SIZE 2
 #define WET_TREE_HUMIDITY 100
 #define TREE_FUEL 1.0
-#define STARTING_HUMIDITY 20
-#define HEAT_FACTOR 0.1
+#define STARTING_HUMIDITY 30
+#define HEAT_FACTOR 0.5
 #define WIND_FACTOR 1
 
 

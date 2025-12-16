@@ -17,7 +17,7 @@ double chance_limiter(double chance)
 }
 
 double heat_prob(double heat, double distance) {
-    return chance_limiter(heat / pow(distance, 2));
+    return chance_limiter(heat / pow(distance, 3));
 }
 
 double wind_prob(vector_t wind, vector_t position) {
@@ -33,7 +33,7 @@ double wind_prob(vector_t wind, vector_t position) {
     double probability = (1 - close / wind.length) * (1 - apart * wind.length);
 
     //jo længere væk, jo mindre en effekt fra vind
-    probability /= length_of_vector(position);
+    probability /= pow(position.length,3);
 
     //en basis værdi for sandsynligheden, jo lavere vindens hastighed er, jo mere nærmes denne værdi
     // probability += 0.5;
@@ -52,11 +52,9 @@ double distance_given_coord(int a, int b) {
 void heat_by_fuel_left(tree_t* tree) {
     if (tree->status != burning) tree->heat = 0;
     //Vi bruger formlen for en parabel med et variabelt toppunkt.
-    double x = tree->fuel_left;
-    int c = 0;
-    double top_x = TREE_FUEL/2;
+    double top_x = TREE_FUEL / 2;
     double top_y = MAX_HEAT;
-    double b = -((c - top_y ) * 4) / 2 * top_x;
-    double a = -b / 2 * top_x;
-    tree->heat = a * pow(x,2) + b * x + c;
+    double b = 4 * top_y / (2 * top_x);
+    double a = -b / (2 * top_x);
+    tree->heat = a * pow(tree->fuel_left,2) + b * tree->fuel_left;
 }

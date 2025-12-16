@@ -16,7 +16,7 @@
 #define GREY "100;100;100"
 #define BLACK "0;0;0"
 #define TREE_REP "  "
-#define MAX_SIZE_OF_COLOR 18 //længden på den længste SGR farve kode streng: "38;2;xxx;xxx;xxxm\0"
+#define MAX_SIZE_OF_COLOR 18 //længden på den længste SGR farve kode streng: "48;2;xxx;xxx;xxxm\0"
 
 
 
