@@ -17,7 +17,7 @@ double chance_limiter(double chance)
 }
 
 double heat_prob(double heat, double distance) {
-    return chance_limiter(heat / pow(distance, 2));
+    return chance_limiter(heat /* / pow(distance, 2)*/);
 }
 
 double wind_prob(vector_t wind, vector_t position) {
@@ -31,7 +31,7 @@ double wind_prob(vector_t wind, vector_t position) {
     //lav vinkel og lav vind = lavere sandsynlighed
     //høj vinkel og høj vind = lavere sandsynlighed
     //lav vind = gennemsnitlig sandsynlighed
-    double probability = (1 - close / wind.length) * (1 - apart * wind.length);
+    double probability = pow(1.2, -apart * wind.length);
 
     //jo længere væk, jo mindre en effekt fra vind
     // probability /= position.length;

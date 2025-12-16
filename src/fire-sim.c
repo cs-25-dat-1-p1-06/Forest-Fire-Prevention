@@ -215,8 +215,7 @@ double calculate_fire_prob(forest_t forest, int x, int y) {
                     /* Vi finder sandsynligheder for at træet ikke brænder, og ganger dem på for heat og wind,
                      * samt distance.
                      */
-                    not_fire_prob *= 1 - heat_prob(tree->heat, distance.length) * HEAT_FACTOR;
-                    not_fire_prob *= 1 - wind_prob(forest.wind, distance) * WIND_FACTOR;
+                    not_fire_prob *= 1 - heat_prob(tree->heat, distance.length) * HEAT_FACTOR * wind_prob(forest.wind, distance) * WIND_FACTOR / pow(distance.length, 3);
                 }
             }
         }
@@ -387,7 +386,7 @@ void fire_sim(forest_t forest, int* tickCounter) {
         print_forest(forest, start_coord.Y);
         status_text(forest,*tickCounter);
         //vi venter 0.4 sekunder (4 * 10^5 mikrosekunder) mellem hver tick
-        usleep((useconds_t)4 * pow(10,5));
+        usleep((useconds_t)2 * pow(10,5));
 
         //Vi checker om simulationen er færdig
     } while (!sim_finished_check(forest));

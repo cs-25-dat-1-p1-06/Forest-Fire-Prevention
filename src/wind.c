@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define WIND_SPEED_MIN 0.5
+#define WIND_SPEED_MIN 10
 #define WIND_SPEED_MAX 15
 
 vector_t rnd_wind() {
