@@ -24,7 +24,7 @@ typedef struct
 
 /**
  * loop til brugerens input
- * @param args pointer til den data som skal sendes til threaden, helst en input_t struct
+ * @param args pointer til den data som skal sendes i threaden, helst en input_t struct
  * @return NULL når den er færdig
  */
 void* user_input_loop(void* args);
@@ -52,7 +52,7 @@ void MouseEventProc(MOUSE_EVENT_RECORD mer, int *x, int *y, short start_y);
 void KeyEventProc(KEY_EVENT_RECORD ker, command_e *command);
 
 /**
- * tillader brugeren at indtaste størrelse og tæthed af skoven
+ * tillader brugeren at indtaste størrelse og tæthed af skoven. Skriver også basale instrukser til kommandoer som kan bruges
  * @param width pointer til den ønskede bredde af skoven
  * @param height pointer til den ønskede højde af skoven
  * @param density pointer til en sandsynlighedsværdi mellem 0 og 1 for om der er et træ i en celle
