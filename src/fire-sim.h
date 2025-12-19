@@ -5,7 +5,7 @@
   
 #define RATE_OF_BURN 0.2
 #define MAX_HEAT 0.3
-#define SPREAD_RANGE 2.3
+#define SPREAD_RANGE 5
 #define USER_DEAD_ZONE_SIZE 5
 #define USER_SPLASH_ZONE_SIZE 2
 #define WET_TREE_HUMIDITY 100
