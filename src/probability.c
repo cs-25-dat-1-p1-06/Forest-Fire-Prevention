@@ -34,7 +34,7 @@ double wind_prob(vector_t wind, vector_t position) {
     double probability = (1 - close / wind.length) * (1 - apart * wind.length);
 
     //jo længere væk, jo mindre en effekt fra vind
-    // probability /= position.length;
+    probability /= position.length;
 
     //en basis værdi for sandsynligheden, jo lavere vindens hastighed er, jo mere nærmes denne værdi
     // probability += 0.5;
